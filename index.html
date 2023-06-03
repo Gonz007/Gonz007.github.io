@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" style="background-color: rgba(0, 101, 184, 0.452);">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibra</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background-color: rgba(0, 101, 184, 0.582);
+        }
+
+        .header button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            /* Aumenta el radio de la esquina para obtener bordes más redondeados */
+            cursor: pointer;
+            color: white;
+            /* Color de texto blanco */
+            background-color: rgba(0, 50, 100, 0.8);
+            /* Un color azul más oscuro que el fondo */
+            transition: background-color 0.3s;
+            /* Transición suave del color de fondo */
+        }
+
+
+        .header button:hover {
+            background-color: rgba(1, 66, 131, 0.8);
+            /* Un color aún más oscuro para el efecto de hover */
+        }
+
+        .content {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .content iframe {
+            width: 80%;
+            height: 600px;
+        }
+
+
+        .content iframe {
+            width: 100%;
+            height: 900px;
+            border: none;
+            
+            border-radius: 5px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: left;
+            padding: 20px;
+            background-color: rgba(0, 101, 184, 0.582);
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <button id="btn1">inicio</button>
+        <button id="btn2">Desarrollo</button>
+        <button id="btn3">Medio ambiente</button>
+    </div>
+
+    <div class="content">
+        <iframe id="myIframe" src="logo.html"></iframe>
+    </div>
+
+    <script>
+        document.getElementById("btn1").addEventListener("click", function () {
+            document.getElementById("myIframe").src = "logo.html";
+        });
+
+        document.getElementById("btn2").addEventListener("click", function () {
+            document.getElementById("myIframe").src = "desarrollo.html";
+        });
+
+        document.getElementById("btn3").addEventListener("click", function () {
+            document.getElementById("myIframe").src = "ambiente.html";
+        });
+
+    </script>
+</body>
+
+</html>
