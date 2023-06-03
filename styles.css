@@ -44,6 +44,7 @@ footer {
 }
 model-viewer{
     height: 500px;
+    width: 700px;
 }
 @media (max-width: 1000px) {
     main {
