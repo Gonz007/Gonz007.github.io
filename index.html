@@ -1,22 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Mi página web</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <script src="https://threejs.org/build/three.min.js"></script>
-    <script src="https://threejs.org/examples/jsm/loaders/FBXLoader.js"></script>
+    <title>Mi Página Web</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+
+    <!-- Importar los estilos de model-viewer -->
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.css">
+
+    <!-- Importar model-viewer -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
 </head>
 <body>
-    <nav id="nav-bar">
-        <h1>Mi sitio web</h1>
-    </nav>
+    <header>
+        <nav>
+            <h1>Mi Página Web</h1>
+        </nav>
+    </header>
+
     <main>
-        <div id="cubo3D" class="cat-container"></div>
-        <div class="cat-container">
-            <img src="gato2.jpg" alt="Imagen de un gato" class="cat-image">
+        <div id="cubo3D">
+            <model-viewer src="cubo.glb" alt="Un cubo 3D" auto-rotate camera-controls></model-viewer>
+        </div>
+        
+
+        <div class="imgContainer">
+            <img src="gato1.jpg" alt="Imagen de un gato">
+            <img src="gato2.jpg" alt="Imagen de otro gato">
         </div>
     </main>
-    <script src="script.js"></script>
+
+    <footer>
+        <p>&copy; 2023 Mi Página Web</p>
+    </footer>
+    
+    <script type="module" src="script.js"></script>
 </body>
 </html>
