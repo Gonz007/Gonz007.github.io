@@ -1,101 +1,66 @@
 <!DOCTYPE html>
-<html lang="es" style="background-color: rgba(0, 101, 184, 0.452);">
+<html>
+    <head>
+        <title>Mi modelo 3D</title>
+        <style>
+            body { margin: 0; }
+            canvas { display: block; }
+        </style>
+    </head>
+    <body>
+        <script type="module">
+            import * as THREE from 'https://cdn.skypack.dev/three';
+            import { FBXLoader } from 'https://cdn.skypack.dev/three/examples/jsm/loaders/FBXLoader.js';
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fibra</title>
+            var scene, camera, renderer;
+            var model;
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+            init();
+            animate();
 
-        .header {
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            background-color: rgba(0, 101, 184, 0.582);
-        }
+            function init() {
 
-        .header button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            /* Aumenta el radio de la esquina para obtener bordes más redondeados */
-            cursor: pointer;
-            color: white;
-            /* Color de texto blanco */
-            background-color: rgba(0, 50, 100, 0.8);
-            /* Un color azul más oscuro que el fondo */
-            transition: background-color 0.3s;
-            /* Transición suave del color de fondo */
-        }
+                // Crear una escena
+                scene = new THREE.Scene();
 
+                // Crear una cámara
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 5;
 
-        .header button:hover {
-            background-color: rgba(1, 66, 131, 0.8);
-            /* Un color aún más oscuro para el efecto de hover */
-        }
+                // Crear un renderizador WebGL
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
 
-        .content {
-            display: flex;
-            margin-top: 20px;
-        }
+                // Cargar modelo 3D
+                var loader = new FBXLoader();
+                loader.load('Room.fbx', function(object) {
+                    model = object;
+                    scene.add(model);
+                });
 
-        .content iframe {
-            width: 80%;
-            height: 600px;
-        }
+                // Agregar luz
+                var light = new THREE.AmbientLight(0x404040);
+                scene.add(light);
 
+                // Actualizar cámara y renderer al cambiar el tamaño de la ventana
+                window.addEventListener('resize', function() {
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                });
+            }
 
-        .content iframe {
-            width: 100%;
-            height: 900px;
-            border: none;
-            
-            border-radius: 5px;
-        }
+            function animate() {
+                requestAnimationFrame(animate);
 
-        .footer {
-            display: flex;
-            justify-content: left;
-            padding: 20px;
-            background-color: rgba(0, 101, 184, 0.582);
-            position: absolute;
-            width: 100%;
-            bottom: 0;
-        }
-    </style>
-</head>
+                if(model) {
+                    model.rotation.y += 0.01;
+                }
 
-<body>
-    <div class="header">
-        <button id="btn1">inicio</button>
-        <button id="btn2">Desarrollo</button>
-        <button id="btn3">Medio ambiente</button>
-    </div>
+                renderer.render(scene, camera);
+            }
 
-    <div class="content">
-        <iframe id="myIframe" src="logo.html"></iframe>
-    </div>
-
-    <script>
-        document.getElementById("btn1").addEventListener("click", function () {
-            document.getElementById("myIframe").src = "logo.html";
-        });
-
-        document.getElementById("btn2").addEventListener("click", function () {
-            document.getElementById("myIframe").src = "desarrollo.html";
-        });
-
-        document.getElementById("btn3").addEventListener("click", function () {
-            document.getElementById("myIframe").src = "ambiente.html";
-        });
-
-    </script>
-</body>
-
+        </script>
+    </body>
 </html>
