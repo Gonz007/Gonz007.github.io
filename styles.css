@@ -6,7 +6,7 @@
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #ffe4e1;
+    background-color: #ffd9d4;
     color: #314e52;
 }
 
@@ -17,7 +17,7 @@ header {
 }
 
 nav h1 {
-    color: #314e52;
+    color: #000000;
 }
 main {
     display: flex;
@@ -25,7 +25,6 @@ main {
     justify-content: center;
     padding: 20px;
 }
-
 
 .imgContainer {
     width: 50%;
@@ -42,10 +41,12 @@ footer {
     padding: 10px;
     margin-top: 20px;
 }
+
 model-viewer{
     height: 500px;
     width: 700px;
 }
+
 @media (max-width: 1000px) {
     main {
         flex-direction: column;
