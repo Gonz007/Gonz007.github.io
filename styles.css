@@ -1,59 +1,110 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
-    font-family: Arial, sans-serif;
-    background-color: #ffd9d4;
-    color: #314e52;
+  background-color: #FFFFFF;
+  color: #000000;
+  font-family: 'MS Sans Serif', Geneva, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 header {
-    background-color: #f4acb7;
-    padding: 20px;
-    text-align: center;
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  background-color: #FFFFFF;
+  color: #000000;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
 }
 
-nav h1 {
-    color: #000000;
-}
-main {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 20px;
-}
-
-.imgContainer {
-    width: 50%;
+.barra-iconos {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
 }
 
-.imgContainer img {
-    width: 50%;
-    height: auto;
+.barra-iconos:hover {
+  transform: translateY(0);
+}
+
+.icono-container {
+  display: flex;
+  justify-content: flex-start;
+  transform: translateX(-50%);
+  transition: transform 0.3s ease;
+  justify-content: flex-end;
+  backdrop-filter: blur(5px);
+}
+
+.nombre-icono {
+  color: #000;
+}
+
+.icono-container i {
+  margin-right: 25px;
+  font-size: 40px;
+}
+
+.icono-container .nombre-icono {
+  margin-right: 15px;
+}
+
+.barra-iconos a:hover .icono-container {
+  transform: translateX(0);
+}
+
+.barra-iconos a {
+  color: #000000;
+  text-decoration: none;
+  display: block;
+  overflow: hidden;
+  margin-bottom: 0;
+  
+}
+
+.seccion {
+  width: 90%;
+  height: 300px;
+  margin: 20px auto;
+  display: flex;
+  justify-content: space-evenly;
+  background-color: #FFFFFF;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+}
+
+.mitad-seccion {
+  width: 90%;
+  height: 100%;
+  background-color: #FFFFFF;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
 }
 
 footer {
-    background-color: #f4acb7;
-    text-align: center;
-    padding: 10px;
-    margin-top: 20px;
+  padding: 20px;
+  text-align: center;
+  background-color: #FFFFFF;
+  color: #000000;
+  border-top: 2px solid #808080;
+  border-right: 2px solid #808080;
 }
 
-model-viewer{
-    height: 500px;
-    width: 700px;
-}
+@media (max-width: 768px) {
+  .seccion,
+  .mitad-seccion {
+    flex-direction: column;
+    height: auto;
+  }
 
-@media (max-width: 1000px) {
-    main {
-        flex-direction: column;
-    }
+  .mitad-seccion {
+    border-right: none;
+  }
 
-    #cubo3D,
-    .imgContainer {
-        width: 100%;
-    }
+  .seccion,
+  .mitad-seccion {
+    transition: all 0.5s ease;
+  }
 }

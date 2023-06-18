@@ -1,47 +1,48 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebHub</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js"></script>
+<html>
+  <head>
+    <title>Gitweb</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
-    <!-- Importar los estilos de model-viewer -->
-    <link type="text/css" rel="stylesheet" href="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.css">
-
-    <!-- Importar model-viewer -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <nav>
-            <h1>Mi blog, prueba de rendimiento</h1>
-        </nav>
+      <h1>Mi Blog personal</h1>
+      <img src="tu-icono.jpg" alt="icono">
     </header>
 
-    <main>
-        <div id="modelo">
-            <model-viewer src="cubo.glb" alt="Un modelo 3D" auto-rotate camera-controls autoplay></model-viewer>
-Modelo 
-3,7 mb
-        </div>
-        
-        <div class="imgContainer">
-            <img src="gato1.jpg" alt="Imagen de un gato">
-            <img src="gato2.jpg" alt="Imagen de otro gato">
-            Fotos de gatos
-            3,0 mb
-        </div>    
-        <div>
-
-        </div>
-    </main>
-
-    <footer>
-        <p>Funciona mejor en Firefox y edge</p>
-    </footer>
+    <div class="barra-iconos">
+        <a href="https://github.com/Gonz007" target="_blank">
+          <div class="icono-container">
+            <span class="nombre-icono">GitHub</span>
+            <i class="fab fa-github"></i>
+          </div>
+        </a>
+        <a href="https://www.linkedin.com/in/gonzalo-ortiz-vera" target="_blank">
+          <div class="icono-container">
+            <span class="nombre-icono">LinkedIn</span>
+            <i class="fab fa-linkedin"></i>
+          </div>
+        </a>
+        <a href="mailto:tu-email@gmail.com" target="_blank">
+          <div class="icono-container">
+            <span class="nombre-icono">Gmail</span>
+            <i class="fas fa-envelope"></i>
+          </div>
+        </a>
+    </div>
     
-    <script type="module" src="script.js"></script>
-</body>
+    <div class="seccion">
+      <div class="mitad-seccion">primero</div>
+      <div class="mitad-seccion">segundo</div>
+    </div>
+
+    <div class="seccion">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptates repellendus enim numquam tenetur. Eveniet ullam, praesentium impedit incidunt placeat recusandae accusantium eos nam neque nisi, officia magnam necessitatibus optio dicta.</div>
+    <div class="seccion">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, commodi. Deserunt commodi nihil assumenda unde amet similique, recusandae veniam facere corporis quibusdam. Asperiores quidem, sint temporibus rem deleniti atque alias.</div>
+    
+    <footer>
+      <p>Gonzalo Ortiz</p>
+    </footer>
+  </body>
 </html>
