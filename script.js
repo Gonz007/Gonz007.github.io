@@ -31,7 +31,7 @@ function changeLanguage(language) {
       welcomeMessage.textContent = 'Welcome to my personal blog';
     }
 }
-const songs = ['chill.mp3', 'song2.mp3', 'song3.mp3'];
+const songs = ['music/chill.mp3', 'music/japan.mp3', 'music/salsa.mp3'];
 let currentSong = 0;
 const musicPlayer = document.getElementById('musicPlayer');
 const audioPlayer = document.getElementById('audioPlayer');
@@ -41,21 +41,36 @@ const pauseButton = document.getElementById('pause');
 const nextButton = document.getElementById('next');
 const previousButton = document.getElementById('previous');
 const muteButton = document.getElementById('mute');
+
 playMusicButton.addEventListener('click', function() {
-    musicPlayer.style.display = 'block';
-    audioPlayer.play();
-    playMusicButton.style.display = 'none';
-    pauseButton.style.display = 'inline';
+  musicPlayer.style.display = 'block';
+  audioPlayer.play();
+  playMusicButton.style.display = 'none';
+  pauseButton.style.display = 'inline';
+});
+
+previousButton.addEventListener('click', function() {
+  currentSong = (currentSong - 1 + songs.length) % songs.length;
+  sourcePlayer.src = songs[currentSong];
+  audioPlayer.load();
+  audioPlayer.play();
+});
+
+nextButton.addEventListener('click', function() {
+  currentSong = (currentSong + 1) % songs.length;
+  sourcePlayer.src = songs[currentSong];
+  audioPlayer.load();
+  audioPlayer.play();
 });
 
 const pauseIcon = document.querySelector('#pause i');
 pauseButton.addEventListener('click', function() {
   if (audioPlayer.paused) {
     audioPlayer.play();
-    pauseIcon.className = 'fas fa-pause';
+    pauseIcon.className = 'fas fa-play';
   } else {
     audioPlayer.pause();
-    pauseIcon.className = 'fas fa-play';
+    pauseIcon.className = 'fas fa-pause';
   }
 });
 nextButton.addEventListener('click', function() {
@@ -130,4 +145,3 @@ audioPlayer.pause();
     musicPlayer.style.display = 'none';
     playMusicButton.style.display = 'inline';
   });
-  

@@ -61,7 +61,7 @@ main {
 }
 
 #controls button {
-  width: 48%;  /* Ajustar según sea necesario */
+  width: 48%;
   background-color: #808080;
   color: #FFFFFF;
   border: none;
@@ -108,7 +108,6 @@ header {
 
 .header-buttons button {
   padding: 10px;
-  /* Añade los estilos que desees para tus botones aquí */
 }
 .header-buttons select, .header-buttons button {
   padding: 10px;
