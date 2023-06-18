@@ -2,8 +2,81 @@ body {
   background-color: #FFFFFF;
   color: #000000;
   font-family: 'MS Sans Serif', Geneva, sans-serif;
-  max-width: 1200px;
+  max-width: 1450px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main {
+  flex: 1;
+}
+#seekbar {
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;
+  appearance: none;
+  outline: none;
+  background: #808080;
+  overflow: hidden;
+}
+
+#seekbar::-webkit-slider-thumb {
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #000000;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+#songList {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#seekbar::-webkit-slider-thumb:hover,
+#seekbar::-webkit-slider-thumb:active {
+  background: #4b4b4b;
+}
+
+#musicPlayer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 300px;
+  background-color: #FFFFFF;
+  border: 2px solid #808080;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: 'MS Sans Serif', Geneva, sans-serif;
+  color: #000000;
+}
+
+#controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+#controls button {
+  width: 48%;  /* Ajustar según sea necesario */
+  background-color: #808080;
+  color: #FFFFFF;
+  border: none;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+#controls button:hover {
+  background-color: #000000;
+  color: white;
 }
 
 header {
@@ -15,7 +88,38 @@ header {
   border-bottom: 2px solid #808080;
   border-right: 2px solid #808080;
 }
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-buttons {
+  text-align: right;
+}
 
+.header-buttons select,
+.header-buttons button {
+  display: block;
+  margin-top: 10px;
+}
+.header-buttons {
+  display: flex;
+}
+
+.header-buttons button {
+  padding: 10px;
+  /* Añade los estilos que desees para tus botones aquí */
+}
+.header-buttons select, .header-buttons button {
+  padding: 10px;
+  background-color: #FFFFFF;
+  border: 2px solid #808080;
+  color: #000000;
+  font-family: 'MS Sans Serif', Geneva, sans-serif;
+}
+.musicPlayer{
+  display: none; width: 300px; border: 2px solid #808080; border-radius: 10px; padding: 10px; position: fixed; top: 80px; right: 20px; background-color: #FFFFFF;
+}
 .barra-iconos {
   position: fixed;
   bottom: 0;
@@ -79,8 +183,6 @@ header {
   width: 90%;
   height: 100%;
   background-color: #FFFFFF;
-  border-bottom: 2px solid #808080;
-  border-right: 2px solid #808080;
 }
 
 footer {
@@ -107,4 +209,13 @@ footer {
   .mitad-seccion {
     transition: all 0.5s ease;
   }
+}
+#closePlayer {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+#musicPlayer h2 {
+  margin-top: 0;
 }
