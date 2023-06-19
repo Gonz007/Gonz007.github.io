@@ -1,98 +1,114 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Gitweb</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
-  </head>
-  <body>
+</head>
+
+<body>
 
 
     <header>
-      <div class="header-content">
-        <h1><p id="welcome">Bienvenido a mi blog personal</p></h1>
-        <div class="header-buttons">
-          <select id="changeStyle">
-            <option value="default">Minimal</option>
-            <option value="default1">Pastel</option>
-            <option value="default2">Otter</option>
-          </select>
-          <select id="changeLanguage">
-            <option value="es">ES</option>
-            <option value="en">EN</option>
-          </select>
-          <button id="playMusic">Reproducir música</button>
+        <div class="header-content">
+            <h1>
+                <p id="welcome">Bienvenido a mi blog personal</p>
+            </h1>
+
         </div>
-      </div>
-      <img src="icono iguesssssss.jpg" alt="icono">
+
+        <div class="header-buttons">
+            <select id="changeStyle">
+          <option value="default">Minimal</option>
+          <option value="default1">Pastel</option>
+          <option value="default2">Dark</option>
+        </select>
+            <select id="changeLanguage">
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+        </select>
+            <button id="playMusic">Reproducir música</button>
+        </div>
     </header>
 
-<div id="musicPlayer" style="display: none;">
-  <button id="closePlayer">X </button><h2>Reproductor de música</h2>
+    <div id="musicPlayer" style="display: none;">
+        <button id="closePlayer">X </button>
+        <h2>Reproductor de música</h2>
 
-  
-  
-  
-  <select id="songList" size="3">
+
+
+
+        <select id="songList" size="3">
     <option value="music/chill.mp3">chill love</option>
     <option value="music/salsa.mp3">salsa</option>
     <option value="music/japan.mp3">japan pop</option>
     
   </select>
-  
-  <input id="progressBar" type="range" min="0" value="0" step="1" style="width:100%;" />
-  <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
-  <audio id="audioPlayer" preload="none">
+
+        <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+        <input id="progressBar" type="range" min="0" value="0" step="1" style="width:100%;" />
+        <audio id="audioPlayer" preload="none">
     <source id="sourcePlayer" src="music/chill.mp3">
   </audio>
-  
-  <div id="controls">
-    
-    <button id="previous"><i class="fas fa-step-backward"></i></button>
-    <button id="pause"><i class="fas fa-pause"></i></button>
-    <button id="next"><i class="fas fa-step-forward"></i></button>
-    <button id="mute"><i class="fas fa-volume-up"></i></button>
-  </div>
 
-</div>
+        <div id="controls">
+            <button id="previous"><i class="fas fa-step-backward"></i></button>
+            <button id="pause"><i class="fas fa-play"></i></button>
+            <button id="next"><i class="fas fa-step-forward"></i></button>
+            <button id="mute"><i class="fas fa-volume-up"></i></button>
+            <div id="volumeControls">
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.2" orient="vertical" />
+            </div>
+        </div>
+
+
+    </div>
 
 
 
     <main>
-    <div class="barra-iconos">
-        <a href="https://github.com/Gonz007" target="_blank">
-          <div class="icono-container">
-            <span class="nombre-icono">GitHub</span>
-            <i class="fab fa-github"></i>
-          </div>
-        </a>
-        <a href="https://www.linkedin.com/in/gonzalo-ortiz-vera" target="_blank">
-          <div class="icono-container">
-            <span class="nombre-icono">LinkedIn</span>
-            <i class="fab fa-linkedin"></i>
-          </div>
-        </a>
-        <a href="mailto:tu-email@gmail.com" target="_blank">
-          <div class="icono-container">
-            <span class="nombre-icono">Gmail</span>
-            <i class="fas fa-envelope"></i>
-          </div>
-        </a>
-    </div>
-    
-    <div class="seccion">
-      <div class="mitad-seccion">primero</div>
-      <div class="mitad-seccion">segundo</div>
-    </div>
+        <div class="barra-iconos">
+            <a href="https://github.com/Gonz007" target="_blank">
+                <div class="icono-container">
+                    <span class="nombre-icono">GitHub</span>
+                    <i class="fab fa-github"></i>
+                </div>
+            </a>
+            <a href="https://www.linkedin.com/in/gonzalo-ortiz-vera" target="_blank">
+                <div class="icono-container">
+                    <span class="nombre-icono">LinkedIn</span>
+                    <i class="fab fa-linkedin"></i>
+                </div>
+            </a>
+            <a href="contact.html" target="_blank">
+                <div class="icono-container">
+                    <span class="nombre-icono">Gmail</span>
+                    <i class="fas fa-envelope"></i>
+                </div>
+            </a>
+        </div>
 
-    <div class="seccion">Texto de prueba en idimioma español Con MúchÁ@s</div>
-    <div class="seccion">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, commodi. Deserunt commodi nihil assumenda unde amet similique, recusandae veniam facere corporis quibusdam. Asperiores quidem, sint temporibus rem deleniti atque alias.</div>
-    
-  </main>
+        <div class="seccion">
+            <div class="mitad-seccion">primero</div>
+            <div class="mitad-seccion">Soy un desarrollador de software versátil con experiencia en C#, Java ,Angular y Python. Me apasiona la resolución de problemas y la creación de soluciones eficaces y escalables.
+                <br>
+                <br> En esta pagina encontrarás algunos de mis intereses y proyectos, si tienes alguna duda o sugerencia en la ezquina inferior izquierda están mis redes.</div>
+        </div>
+        <div class="seccion">
+            <div class="mitad-seccion">Conocimiento en:</div>
+            <div class="mitad-seccion">C# y tales
+            </div>
+        </div>
+        <div class="seccion">Texto de prueba en idimioma español Con MúchÁ@s</div>
+        <div class="seccion">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, commodi. Deserunt commodi nihil assumenda unde amet similique, recusandae veniam facere corporis quibusdam. Asperiores quidem, sint temporibus rem deleniti atque alias.</div>
+
+    </main>
     <footer>
-      <p>Gonzalo Ortiz</p>
+        <p>Gonzalo Ortiz</p>
     </footer>
     <script src="script.js"></script>
-  </body>
+</body>
+
 </html>
