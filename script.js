@@ -45,24 +45,24 @@ function changeStyle(value) {
         songListText.forEach(el => el.style.color = '#000000');
     } else if (value === 'default1') {
         body.style.backgroundColor = "#ADD8E6";
-        textElements.forEach(el => el.style.color = '#000080');
-        borderElements.forEach(el => el.style.borderColor = '#0000FF');
+        textElements.forEach(el => el.style.color = '#F081FF');
+        borderElements.forEach(el => el.style.borderColor = '#F081FF');
         mainElements.forEach(el => el.style.backgroundColor = '#ADD8E6');
         headerElement.style.backgroundColor = '#ADD8E6';
         footerElement.style.backgroundColor = '#ADD8E6';
         controls.forEach(el => el.style.backgroundColor = '#ADD8E6');
-        icons.forEach(el => el.style.color = '#000080');
-        iconNames.forEach(el => el.style.color = '#000080');
+        icons.forEach(el => el.style.color = '#F081FF');
+        iconNames.forEach(el => el.style.color = '#F081FF');
         musicPlayer.style.backgroundColor = '#ADD8E6';
-        playerIcons.forEach(el => el.style.color = '#000080');
+        playerIcons.forEach(el => el.style.color = '#F081FF');
         headerButtons.forEach(el => {
             el.style.backgroundColor = '#ADD8E6';
-            el.style.color = '#000080';
-            el.style.borderColor = '#0000FF';
+            el.style.color = '#F081FF';
+            el.style.borderColor = '#F081FF';
         });
         songList.style.backgroundColor = '#ADD8E6';
-        songList.style.borderColor = '#0000FF';
-        songListText.forEach(el => el.style.color = '#000080');
+        songList.style.borderColor = '#F081FF';
+        songListText.forEach(el => el.style.color = '#F081FF');
     } else if (value === 'default2') {
         body.style.backgroundColor = "#303030";
         textElements.forEach(el => el.style.color = '#FFFFFF');
@@ -95,15 +95,50 @@ volumeSlider.addEventListener('input', function() {
 });
 
 
+
 function changeLanguage(language) {
     const welcomeMessage = document.getElementById('welcome');
+    const title = document.getElementById('title');
+    const intro1 = document.getElementById('intro1');
+    const intro2 = document.getElementById('intro2');
+    const knowledge1 = document.getElementById('knowledge1');
+    const knowledge2 = document.getElementById('knowledge2');
+    const footerText = document.getElementById('footerText');
+    const musicPlayerTitle = document.getElementById('musicPlayerTitle');
+    const closePlayer = document.getElementById('closePlayer');
 
     if (language === 'es') {
         welcomeMessage.textContent = 'Bienvenido a mi blog personal';
+        title.textContent = 'Gitweb';
+        intro1.textContent = 'primero';
+        intro2.textContent = 'Soy un desarrollador de software versátil con experiencia en C#, Java ,Angular y Python. Me apasiona la resolución de problemas y la creación de soluciones eficaces y escalables.';
+        knowledge1.textContent = 'Conocimiento en:';
+        knowledge2.textContent = 'C# y tales';
+        footerText.textContent = 'Gonzalo Ortiz';
+        musicPlayerTitle.textContent = 'Reproductor de música';
     } else if (language === 'en') {
         welcomeMessage.textContent = 'Welcome to my personal blog';
+        title.textContent = 'Gitweb';
+        intro1.textContent = 'first';
+        intro2.textContent = 'I am a versatile software developer with experience in C#, Java, Angular, and Python. I am passionate about problem-solving and creating efficient and scalable solutions. ';
+        knowledge1.textContent = 'Knowledge in:';
+        knowledge2.textContent = 'C# and such';
+        footerText.textContent = 'Gonzalo Ortiz';
+        musicPlayerTitle.textContent = 'Music Player';
     }
 }
+
+document.getElementById('changeLanguage').addEventListener('change', function() {
+    changeLanguage(this.value);
+});
+
+document.getElementById('changeLanguage').addEventListener('change', function() {
+    changeLanguage(this.value);
+});
+
+
+
+
 const songs = ['music/chill.mp3', 'music/japan.mp3', 'music/salsa.mp3'];
 let currentSong = 0;
 const musicPlayer = document.getElementById('musicPlayer');

@@ -2,57 +2,47 @@
 <html>
 
 <head>
-    <title>Gitweb</title>
+    <title id="title">Gitweb</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
-
 </head>
 
 <body>
-
-
     <header>
         <div class="header-content">
             <h1>
                 <p id="welcome">Bienvenido a mi blog personal</p>
             </h1>
-
         </div>
-
         <div class="header-buttons">
             <select id="changeStyle">
-          <option value="default">Minimal</option>
-          <option value="default1">Pastel</option>
-          <option value="default2">Dark</option>
-        </select>
+                <option value="default">Minimal</option>
+                <option value="default1">Pastel</option>
+                <option value="default2">Dark</option>
+            </select>
             <select id="changeLanguage">
-          <option value="es">ES</option>
-          <option value="en">EN</option>
-        </select>
+                <option value="es">ES</option>
+                <option value="en">EN</option>
+            </select>
             <button id="playMusic">Reproducir música</button>
         </div>
     </header>
 
+
+
     <div id="musicPlayer" style="display: none;">
         <button id="closePlayer">X </button>
-        <h2>Reproductor de música</h2>
-
-
-
-
+        <h2 id="musicPlayerTitle">Reproductor de música</h2>
         <select id="songList" size="3">
-    <option value="music/chill.mp3">chill love</option>
-    <option value="music/salsa.mp3">salsa</option>
-    <option value="music/japan.mp3">japan pop</option>
-    
-  </select>
-
+          <option value="music/chill.mp3">chill love</option>
+          <option value="music/salsa.mp3">salsa</option>
+          <option value="music/japan.mp3">japan pop</option>
+      </select>
         <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
         <input id="progressBar" type="range" min="0" value="0" step="1" style="width:100%;" />
         <audio id="audioPlayer" preload="none">
     <source id="sourcePlayer" src="music/chill.mp3">
   </audio>
-
         <div id="controls">
             <button id="previous"><i class="fas fa-step-backward"></i></button>
             <button id="pause"><i class="fas fa-play"></i></button>
@@ -62,9 +52,8 @@
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.2" orient="vertical" />
             </div>
         </div>
-
-
     </div>
+
 
 
 
@@ -90,24 +79,22 @@
             </a>
         </div>
 
-        <div class="seccion">
-            <div class="mitad-seccion">primero</div>
-            <div class="mitad-seccion">Soy un desarrollador de software versátil con experiencia en C#, Java ,Angular y Python. Me apasiona la resolución de problemas y la creación de soluciones eficaces y escalables.
-                <br>
-                <br> En esta pagina encontrarás algunos de mis intereses y proyectos, si tienes alguna duda o sugerencia en la ezquina inferior izquierda están mis redes.</div>
-        </div>
-        <div class="seccion">
-            <div class="mitad-seccion">Conocimiento en:</div>
-            <div class="mitad-seccion">C# y tales
-            </div>
-        </div>
-        <div class="seccion">Texto de prueba en idimioma español Con MúchÁ@s</div>
-        <div class="seccion">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus, commodi. Deserunt commodi nihil assumenda unde amet similique, recusandae veniam facere corporis quibusdam. Asperiores quidem, sint temporibus rem deleniti atque alias.</div>
 
+
+        <div class="seccion" id="section1">
+            <div class="mitad-seccion" id="intro1">primero</div>
+            <div class="mitad-seccion" id="intro2">Soy un desarrollador de software versátil con experiencia en C#, Java ,Angular y Python. Me apasiona la resolución de problemas y la creación de soluciones eficaces y escalables.</div>
+        </div>
+        <div class="seccion" id="section2">
+            <div class="mitad-seccion" id="knowledge1">Conocimiento en:</div>
+            <div class="mitad-seccion" id="knowledge2">C# y tales</div>
+        </div>
     </main>
+
     <footer>
-        <p>Gonzalo Ortiz</p>
+        <p id="footerText">Gonzalo Ortiz</p>
     </footer>
+
     <script src="script.js"></script>
 </body>
 
