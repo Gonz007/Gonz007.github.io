@@ -82,6 +82,17 @@ header {
     border-right: 2px solid #808080;
 }
 
+header {
+    width: 100%;
+    height: 60px;
+    /* O el valor que prefieras */
+    margin: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    /* Esto asegura que el encabezado esté por encima de otros elementos */
+}
+
 .header-content {
     display: flex;
     justify-content: space-between;
@@ -171,6 +182,24 @@ header {
     background-color: #FFFFFF;
     border-bottom: 2px solid #808080;
     border-right: 2px solid #808080;
+}
+
+.seccion1 {
+    width: 90%;
+    height: 20px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: space-evenly;
+    background-color: #FFFFFF;
+}
+
+.seccion2 {
+    width: 90%;
+    height: 20px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    background-color: #FFFFFF;
 }
 
 .mitad-seccion {

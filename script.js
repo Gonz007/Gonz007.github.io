@@ -6,7 +6,6 @@ document.getElementById('changeLanguage').addEventListener('change', function() 
     changeLanguage(this.value);
 })
 
-//No soy de hacer las cosas pequeñas y bien, esta siguiente funcion lo mas reducido posible es el ejemplo 
 function changeStyle(value) {
     const body = document.body;
     const textElements = document.querySelectorAll('h1, h2, p, span, div');
@@ -108,7 +107,7 @@ function changeLanguage(language) {
     const closePlayer = document.getElementById('closePlayer');
 
     if (language === 'es') {
-        welcomeMessage.textContent = 'Bienvenido a mi blog personal';
+        welcomeMessage.textContent = 'Pal Hueco';
         title.textContent = 'Gitweb';
         intro1.textContent = 'primero';
         intro2.textContent = 'Soy un desarrollador de software versátil con experiencia en C#, Java ,Angular y Python. Me apasiona la resolución de problemas y la creación de soluciones eficaces y escalables.';
@@ -117,7 +116,7 @@ function changeLanguage(language) {
         footerText.textContent = 'Gonzalo Ortiz';
         musicPlayerTitle.textContent = 'Reproductor de música';
     } else if (language === 'en') {
-        welcomeMessage.textContent = 'Welcome to my personal blog';
+        welcomeMessage.textContent = 'Pal Hueco';
         title.textContent = 'Gitweb';
         intro1.textContent = 'first';
         intro2.textContent = 'I am a versatile software developer with experience in C#, Java, Angular, and Python. I am passionate about problem-solving and creating efficient and scalable solutions. ';
