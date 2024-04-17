@@ -4,12 +4,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Contacto</title>
-
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>Home</title>
 </head>
 
 <body>
+    <header>
 
+        <h1>Mi página</h1>
+        <div class="header-buttons">
+            <button type="button" onclick="window.location.href='index.html';">Salir</button>
+        </div>
+    </header>
+
+    <div class="maincontainer">
+        <h2>Presentación</h2>
+        <div class="profile">
+            <img src="foto.png" alt="Tu foto">
+            <p>Soy una persona responsable y dinámica, comprometida con el aprendizaje continuo y la mejora constante. Poseo habilidades para trabajar tanto en equipo como de manera independiente. Estoy dispuesto a asumir diversas responsabilidades y horarios
+                laborales. Me entusiasma la oportunidad de unirme a su empresa y contribuir al logro de sus metas.</p>
+        </div>
+
+        <div class="title">
+            <h2>Proyectos</h2>
+        </div>
+
+        <div class="projects">
+            <div class="project" onclick="openModal('https://raw.githubusercontent.com/Gonz007/Assets/9ea39c6b03e13296ca25f837e2e618ed1171e0e5/integral.png', 'Integracion basica de una app que soluciona integrales y ademas te da un consejo con la API de ChatGPT con su modelo davinci-002.<br><br>Proyecto realizado como parte de proyecto universitario para la materia de cálculo 2.<br><br><a href=\'https://github.com/Gonz007/Integrales_Chatgpt\' target=\'_blank\'>Ver en GitHub</a>')">
+                <img src="https://raw.githubusercontent.com/Gonz007/Assets/9ea39c6b03e13296ca25f837e2e618ed1171e0e5/integral.png" alt="Integrales_Chatgpt">
+            </div>
+
+            <div class="project" onclick="openModal('https://raw.githubusercontent.com/Gonz007/Assets/main/C%23_music_player.png', 'Primera versión de un reproductor de música de alta fidelidad de código abierto hecho en C# con Windows Forms.<br><br>C# Music Player<br><br>Se implementan:<br>- Reproductor básico<br>- Visor de carátulas<br>- Selector de paths y ajuste de volumen<br>- Archivo de configuraciones<br><br><a href=\'https://github.com/Gonz007/Reproductor_HiFy_CSharp\' target=\'_blank\'>Ver en GitHub</a>')">
+                <img src="https://raw.githubusercontent.com/Gonz007/Assets/main/C%23_music_player.png" alt="Reproductor_HiFy_C#">
+            </div>
+
+            <div class="project" onclick="openModal('https://raw.githubusercontent.com/Gonz007/Assets/main/Python_music_player.png', 'Reproductor de música de alta fidelidad hecho en Python con interfaz gráfica, construido con PyQt5 y Pygame. Permite reproducir archivos de música locales.<br><br>Python Music Player<br><br>Se implementan:<br>- Reproductor básico<br>- Visor de carátulas<br>- Selector de paths y ajuste de volumen<br>- Archivo de configuraciones<br><br>Para ejecutar este proyecto se requiere:<br>Instalación de Python: <a href=\'https://www.python.org/\' target=\'_blank\'>https://www.python.org/</a><br>Instalación de las bibliotecas usadas:<br>pip install pygame<br>pip install mutagen<br>pip install PyQt5<br><br><a href=\'https://github.com/Gonz007/Reproductor_HiFy_Python\' target=\'_blank\'>Ver en GitHub</a>')">
+                <img src="https://raw.githubusercontent.com/Gonz007/Assets/main/Python_music_player.png" alt="Reproductor_HiFy_Python">
+            </div>
+
+            <div class="project" onclick="openModal('https://raw.githubusercontent.com/Gonz007/Assets/bffbb4d500254af3beca86438c2538d77eef8265/Swagger_mongo.png', 'Aplicativo_registro_desplazados<br><br>Este proyecto fue realizado como parte de un proyecto universitario para la clase de desarrollo web con el lenguaje de Java 1.8 y con el framework de Spring boot 2.3.0.<br><br><b>Mongo crud &amp; Swagger</b><br><br>En esta segunda entrega del proyecto se incluyen las características:<br><br>- Integración con Swagger<br>- CRUD completo<br>- Envío de correos electrónicos<br>- Integración de base de datos no relacional con MongoDB<br><br>Este proyecto se realizó junto con Juan Camilo Garcia Lucas<br><br><a href=\'https://github.com/Gonz007/Aplicativo_registro_desplazados?tab=readme-ov-file\' target=\'_blank\'>Ver en GitHub</a>')">
+                <img src="https://raw.githubusercontent.com/Gonz007/Assets/bffbb4d500254af3beca86438c2538d77eef8265/Swagger_mongo.png" alt="Proyecto 4">
+            </div>
+
+            <div class="project" onclick="openModal('https://raw.githubusercontent.com/Gonz007/Assets/main/juego_python.gif', 'Repositorio creado para subir proyectos hechos en Python.<br><br>Para ejecutar estos proyectos se requiere:<br>Instalación de Python:<br><a href=\'https://www.python.org/\' target=\'_blank\'>https://www.python.org/</a><br><br>Proyectos incluidos en este repositorio:<br>- Pdf_To_Word: Conversor de archivos en formato .pdf a formato .docx<br>- Python Music Player<br>- Juego_de_consola_Python: Juego de una nave renderizado en la consola de Windows.<br><br>Instalación de las bibliotecas usadas:<br><code>pip install pynput</code><br><br><a href=\'https://github.com/Gonz007/Proyectos_Python\' target=\'_blank\'>Ver en GitHub</a>')">
+                <img src="https://raw.githubusercontent.com/Gonz007/Assets/main/juego_python.gif" alt="Proyecto Python">
+            </div>
+
+            <div class="project">
+                <img src="https://raw.githubusercontent.com/Gonz007/Assets/main/EquitelUsuarios.png" alt="Proyecto Equitel" onclick="openModal('https://raw.githubusercontent.com/Gonz007/Assets/main/EquitelUsuarios.png', 'Este repositorio contiene el código fuente desarrollado para la implementación de un sistema de gestión de ventas de repuestos e insumos para motores. La finalidad de este sistema es facilitar la administración de inventario, la realización de ventas individuales y la generación de informes de ventas diarias.<br><br>Diseño de la Base de Datos:<br>Se ha creado una base de datos que incluye tablas para productos, usuarios, ventas, proveedores y registro de auditoría, para el registro de todas las acciones del sistema asi como la facturacion de 24 se crearon procedimientos almacenados.<br><br>Implementación del Sistema de Autenticación y Autorización:<br>Se ha desarrollado un sistema de autenticación que permite a los usuarios iniciar sesión como administrador y empleado. Se han establecido permisos específicos para cada rol de usuario.<br><br>Equitel:<br>Se ha implementado una interfaz gráfica para la gestión de usuarios y roles. Se han desarrollado páginas y formularios para la gestión de productos, así como para el registro de entradas y salidas de inventario. Se ha creado una pantalla para realizar ventas individuales desde un perfil de usuario vendedor o administrador.<br><br>Implementación de Registro de Auditoría:<br>Se registran todas las acciones relevantes en el sistema, como la creación o modificación de productos, ventas y cambios en roles de usuario.<br><br>Generación de Informes y facturas:<br>Se ha implementado una funcionalidad para generar informes diarios de ventas con el monto total y los repuestos vendidos junto con sus cantidades ademas de la posibilidad de generar facturas port una o varias compras.<br><br>Las tecnologías usadas en el proyecto son:<br>- ASP .Net Core 7.0<br>- SQL Server<br>- Angular 14<br><br><a href=\'https://github.com/Gonz007/Equitel\' target=\'_blank\'>Ver en GitHub</a>')">
+            </div>
+
+        </div>
+
+        <h2>Contacto</h2>
+        <div class="container">
+            <form id="contactForm">
+                <input type="text" id="name" name="name" placeholder="Nombre" required><br><br>
+                <input type="email" id="email" name="email" placeholder="Correo electrónico" required><br><br>
+                <textarea id="message" name="message" placeholder="Mensaje" required></textarea><br><br>
+                <button type="submit" onclick="submitForm()">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-overlay" onclick="closeModal()">
+        <div id="modal-container">
+            <img id="modal-image">
+            <div id="modal-description"></div>
+        </div>
+    </div>
+
+
+    <footer>Mi página</footer>
+
+    <script>
+        function openModal(imgSrc, description) {
+            var modalOverlay = document.getElementById("modal-overlay");
+            var modalImage = document.getElementById("modal-image");
+            var modalDescription = document.getElementById("modal-description");
+
+            modalImage.src = imgSrc;
+            modalDescription.innerHTML = description;
+            modalOverlay.style.display = "flex";
+        }
+
+        function closeModal() {
+            var modalOverlay = document.getElementById("modal-overlay");
+            modalOverlay.style.display = "none";
+        }
+    </script>
 
 </body>
 

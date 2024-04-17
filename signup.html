@@ -5,42 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="styles.css">
-    <title>Formulario de Contacto</title>
-
+    <title>Registro</title>
 </head>
+<header>
+    <h1>Mi página</h1>
+</header>
 
 <body>
     <div class="container">
-        <form id="loginForm">
-            <input type="email" id="email" name="email" placeholder="name@example.com" required><br><br>
-
-            <input type="password" id="password" name="password" placeholder="password" required><br><br>
-
+        <form id="registerForm">
+            <input type="text" id="name" name="name" placeholder="Nombre" required><br><br>
+            <input type="text" id="lastName" name="lastName" placeholder="Apellido" required><br><br>
+            <input type="tel" id="mobile" name="mobile" placeholder="Número de móvil" required><br><br>
+            <input type="email" id="email" name="email" placeholder="Correo electrónico" required><br><br>
+            <input type="password" id="password" name="password" placeholder="Contraseña" required><br><br>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirmar contraseña" required><br><br>
             <div class="button-group">
-                <button type="submit" onclick="login()">Login</button>
-                <button type="button" onclick="register()">Sign up</button>
+                <button type="submit" onclick="register()">sign up</button> O
+                <button type="button" onclick="location.href='index.html';">login</button>
             </div>
-            <button type="button" onclick="guest()">Continue as guest</button>
         </form>
     </div>
-
-    <script>
-        function login() {
-            // Aquí puedes agregar la lógica para el inicio de sesión
-            alert("Iniciando sesión...");
-        }
-
-        function register() {
-            // Aquí puedes agregar la lógica para el registro
-            alert("Redirigiendo a la página de registro...");
-        }
-
-        function guest() {
-            // Aquí puedes agregar la lógica para ingresar como invitado
-            alert("Ingresando como invitado...");
-        }
-    </script>
-
 </body>
 
 </html>
