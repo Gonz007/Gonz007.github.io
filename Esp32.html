@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecturas del Potenciómetro</title>
+  <script type="module">
+    // Importar SDK de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+    // Configuración Firebase - ajusta con tus datos
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxesgrk_NpKb93tbxSZUK42LOGGyTfyxg",
+      databaseURL: "https://fireesp32-b6a1e-default-rtdb.firebaseio.com",
+      projectId: "fireesp32-b6a1e"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // Referencia al nodo /potenciometro
+    const potRef = ref(db, 'potenciometro');
+
+    // Escuchar cambios y actualizar la tabla
+    onValue(potRef, (snapshot) => {
+      const data = snapshot.val();
+      const tbody = document.getElementById('datos-body');
+      tbody.innerHTML = ''; // Limpiar
+      for (const key in data) {
+        const entrada = data[key];
+        const tr = document.createElement('tr');
+        // Timestamp
+        const tdTime = document.createElement('td');
+        tdTime.textContent = key;
+        tr.appendChild(tdTime);
+        // ADC
+        const tdAdc = document.createElement('td');
+        tdAdc.textContent = entrada.adc;
+        tr.appendChild(tdAdc);
+        // Voltaje
+        const tdVolt = document.createElement('td');
+        tdVolt.textContent = entrada.voltaje.toFixed(2);
+        tr.appendChild(tdVolt);
+        // Porcentaje
+        const tdPct = document.createElement('td');
+        tdPct.textContent = entrada.porcentaje;
+        tr.appendChild(tdPct);
+        tbody.appendChild(tr);
+      }
+    });
+  </script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
+    th { background: #f4f4f4; }
+  </style>
+</head>
+<body>
+  <h1>Lecturas del Potenciómetro</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>ADC</th>
+        <th>Voltaje (V)</th>
+        <th>Porcentaje (%)</th>
+      </tr>
+    </thead>
+    <tbody id="datos-body">
+      <tr><td colspan="4">Cargando datos...</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
