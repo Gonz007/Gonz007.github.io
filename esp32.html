@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lecturas del Piránometro</title>
+  <title>Lecturas del Potenciómetro/Pirómetro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -19,114 +19,145 @@
     const db = getDatabase(app);
     const potRef = ref(db, 'potenciometro');
 
+    // Configuración de la gráfica
     const ctx = document.getElementById('myChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
-        datasets: [
-          {
-            label: 'Irradiación (W/m²)',
-            data: [],
-            borderColor: 'orange',
-            tension: 0.1
-          }
-        ]
+        datasets: [{
+          label: 'ADC',
+          data: [],
+          borderColor: 'rgb(255, 99, 132)',
+          yAxisID: 'yADC',
+          tension: 0.1
+        },{
+          label: 'Voltaje (V)',
+          data: [],
+          borderColor: 'rgb(54, 162, 235)',
+          yAxisID: 'yVolt',
+          tension: 0.1
+        },{
+          label: 'Porcentaje (%)',
+          data: [],
+          borderColor: 'rgb(75, 192, 192)',
+          yAxisID: 'yPct',
+          tension: 0.1
+        }]
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: {
             type: 'time',
             time: {
               tooltipFormat: 'HH:mm:ss',
               displayFormats: {
-                second: 'HH:mm:ss',
-                minute: 'HH:mm',
-                hour: 'HH:mm'
+                minute: 'HH:mm'
               }
             },
-            title: {
-              display: true,
-              text: 'Hora'
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
             }
           },
-          y: {
+          yADC: {
+            position: 'left',
+            title: {display: true, text: 'ADC'},
+            beginAtZero: true
+          },
+          yVolt: {
+            position: 'right',
+            title: {display: true, text: 'Voltaje (V)'},
             beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Irradiación (W/m²)'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            display: true
+            grid: {drawOnChartArea: false}
+          },
+          yPct: {
+            position: 'right',
+            title: {display: true, text: 'Porcentaje (%)'},
+            beginAtZero: true,
+            grid: {drawOnChartArea: false},
+            offset: true
           }
         }
       }
     });
 
+    // Función para calcular estadísticas
     function calcularEstadisticas(data) {
-      const voltValues = Object.values(data).map(item => item.voltaje);
-      const pctValues = Object.values(data).map(item => item.porcentaje);
-      const adcValues = Object.values(data).map(item => item.adc);
-      const irrValues = voltValues.map(v => v * 1000 / 0.1);
+      const adcValues = data.map(item => item.adc);
+      const voltValues = data.map(item => item.voltaje);
+      const pctValues = data.map(item => item.porcentaje);
 
       return {
         promedioADC: adcValues.reduce((a, b) => a + b, 0) / adcValues.length,
         promedioVolt: voltValues.reduce((a, b) => a + b, 0) / voltValues.length,
         promedioPct: pctValues.reduce((a, b) => a + b, 0) / pctValues.length,
-        promedioIrr: irrValues.reduce((a, b) => a + b, 0) / irrValues.length,
         maxADC: Math.max(...adcValues),
         minADC: Math.min(...adcValues),
-        ultimoValor: Object.values(data).pop()
+        ultimoValor: data[data.length - 1]
       };
     }
 
     onValue(potRef, (snapshot) => {
-      const data = snapshot.val();
+      const rawData = snapshot.val();
+      if (!rawData) return;
+
+      // Procesar y ordenar datos
+      const dataArray = Object.entries(rawData)
+        .map(([timestamp, values]) => ({
+          timestamp: parseInt(timestamp),
+          ...values
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .slice(-50); // Mostrar últimos 50 registros
+
+      // Actualizar tabla
       const tbody = document.getElementById('datos-body');
       tbody.innerHTML = '';
-
+      
+      // Arrays para la gráfica
       const labels = [];
-      const irrData = [];
-
-      for (const key in data) {
-        const entrada = data[key];
-        const irradiacion = entrada.voltaje * 1000 / 0.1;
-        const fecha = new Date(key);
-
+      const adcData = [];
+      const voltData = [];
+      const pctData = [];
+      
+      dataArray.forEach(entry => {
+        // Filas de la tabla
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${fecha.toLocaleString()}</td>
-          <td>${entrada.adc}</td>
-          <td>${entrada.voltaje.toFixed(2)}</td>
-          <td>${entrada.porcentaje}</td>
-          <td>${irradiacion.toFixed(2)}</td>
+          <td>${new Date(entry.timestamp).toLocaleTimeString()}</td>
+          <td>${entry.adc}</td>
+          <td>${entry.voltaje.toFixed(2)}</td>
+          <td>${entry.porcentaje.toFixed(1)}</td>
         `;
         tbody.appendChild(tr);
+        
+        // Datos para gráfica
+        labels.push(entry.timestamp);
+        adcData.push(entry.adc);
+        voltData.push(entry.voltaje);
+        pctData.push(entry.porcentaje);
+      });
 
-        labels.push(fecha);
-        irrData.push({ x: fecha, y: irradiacion });
-      }
-
+      // Actualizar gráfica
       chart.data.labels = labels;
-      chart.data.datasets[0].data = irrData;
+      chart.data.datasets[0].data = adcData;
+      chart.data.datasets[1].data = voltData;
+      chart.data.datasets[2].data = pctData;
       chart.update();
 
-      const stats = calcularEstadisticas(data);
-      const lastIrr = stats.ultimoValor.voltaje * 1000 / 0.1;
-
+      // Calcular y mostrar estadísticas
+      const stats = calcularEstadisticas(dataArray);
       document.getElementById('stats').innerHTML = `
-        <h3>Estadísticas:</h3>
-        <p>Promedio ADC: ${stats.promedioADC.toFixed(2)}</p>
+        <h3>Estadísticas (últimos 50 registros):</h3>
+        <p>Promedio ADC: ${stats.promedioADC.toFixed(1)}</p>
         <p>Promedio Voltaje: ${stats.promedioVolt.toFixed(2)} V</p>
-        <p>Promedio Porcentaje: ${stats.promedioPct.toFixed(2)}%</p>
-        <p>Promedio Irradiación: ${stats.promedioIrr.toFixed(2)} W/m²</p>
+        <p>Promedio Porcentaje: ${stats.promedioPct.toFixed(1)}%</p>
         <p>Máximo ADC: ${stats.maxADC}</p>
         <p>Mínimo ADC: ${stats.minADC}</p>
-        <p>Último valor: ${stats.ultimoValor.porcentaje}% (${stats.ultimoValor.voltaje.toFixed(2)} V, ${lastIrr.toFixed(2)} W/m²)</p>
+        <p>Último valor: ${stats.ultimoValor.porcentaje.toFixed(1)}% (${stats.ultimoValor.voltaje.toFixed(2)} V)</p>
       `;
     });
   </script>
@@ -144,6 +175,7 @@
     }
     #grafica-container {
       width: 50%;
+      height: 500px;
     }
     th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
     th { background: #f4f4f4; }
@@ -155,24 +187,27 @@
     }
     #stats h3 { margin-top: 0; }
     #stats p { margin: 5px 0; }
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
   </style>
 </head>
 <body>
-  <h1>Lecturas del Piránometro</h1>
-
+  <h1>Lecturas del Potenciómetro/Piranómetro</h1>
+  
   <div class="contenedor-principal">
     <table>
       <thead>
         <tr>
-          <th>Timestamp</th>
+          <th>Hora</th>
           <th>ADC</th>
           <th>Voltaje (V)</th>
           <th>Porcentaje (%)</th>
-          <th>Irradiación (W/m²)</th>
         </tr>
       </thead>
       <tbody id="datos-body">
-        <tr><td colspan="5">Cargando datos...</td></tr>
+        <tr><td colspan="4">Cargando datos...</td></tr>
       </tbody>
     </table>
 
