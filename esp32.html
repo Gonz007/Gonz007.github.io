@@ -37,6 +37,17 @@
       options: {
         responsive: true,
         scales: {
+          x: {
+            type: 'category',
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: 20
+            },
+            title: {
+              display: true,
+              text: 'Timestamp'
+            }
+          },
           y: {
             beginAtZero: true,
             title: {
