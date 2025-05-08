@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lecturas del Potenciómetro/Pirómetro</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Reemplazar la inclusión actual de Chart.js por estas 3 líneas -->
+  <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/+esm"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/+esm"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/+esm"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
