@@ -36,15 +36,21 @@
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         scales: {
           x: {
             type: 'category',
             ticks: {
-              autoSkip: false // Muestra todos los labels
+              autoSkip: false,
+              maxRotation: 45,
+              minRotation: 45,
+              font: {
+                size: 10
+              }
             },
             title: {
               display: true,
-              text: 'Timestamp'
+              text: 'Hora (HHMMSS)'
             }
           },
           y: {
@@ -85,7 +91,6 @@
       const tbody = document.getElementById('datos-body');
       tbody.innerHTML = '';
 
-      // Procesar TODOS los datos para la tabla
       Object.keys(data).forEach(key => {
         const entrada = data[key];
         const irradiacion = entrada.voltaje * 1000 / 0.1;
@@ -101,25 +106,22 @@
         tbody.appendChild(tr);
       });
 
-      // Procesar últimos 5 registros para la gráfica
-      const keys = Object.keys(data).sort(); // Ordenar cronológicamente
-      const lastKeys = keys.slice(-5); // Últimos 5 registros
+      const keys = Object.keys(data).sort();
+      const lastKeys = keys.slice(-10);
 
       const chartLabels = [];
       const chartData = [];
 
       lastKeys.forEach(key => {
         const entrada = data[key];
-        chartLabels.push(key);
+        chartLabels.push(key.split('_')[1]); // Mostrar sólo la hora
         chartData.push(entrada.voltaje * 1000 / 0.1);
       });
 
-      // Actualizar gráfica
       chart.data.labels = chartLabels;
       chart.data.datasets[0].data = chartData;
       chart.update();
 
-      // Calcular estadísticas con TODOS los datos
       const stats = calcularEstadisticas(data);
       const lastIrr = stats.ultimoValor.voltaje * 1000 / 0.1;
 
@@ -152,6 +154,7 @@
     }
     #grafica-container {
       width: 50%;
+      height: 400px; /* Altura fija */
     }
     th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
     th { background: #f4f4f4; }
