@@ -17,7 +17,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const potRef = ref(db, 'piranometro');
+    const potRef = ref(db, 'potenciometro');
 
     const ctx = document.getElementById('myChart').getContext('2d');
     const chart = new Chart(ctx, {
@@ -25,24 +25,6 @@
       data: {
         labels: [],
         datasets: [
-          {
-            label: 'ADC',
-            data: [],
-            borderColor: 'rgb(255, 99, 132)',
-            tension: 0.1
-          },
-          {
-            label: 'Voltaje (V)',
-            data: [],
-            borderColor: 'rgb(54, 162, 235)',
-            tension: 0.1
-          },
-          {
-            label: 'Porcentaje (%)',
-            data: [],
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
-          },
           {
             label: 'Irradiación (W/m²)',
             data: [],
@@ -54,17 +36,41 @@
       options: {
         responsive: true,
         scales: {
+          x: {
+            type: 'time',
+            time: {
+              tooltipFormat: 'HH:mm:ss',
+              displayFormats: {
+                second: 'HH:mm:ss',
+                minute: 'HH:mm',
+                hour: 'HH:mm'
+              }
+            },
+            title: {
+              display: true,
+              text: 'Hora'
+            }
+          },
           y: {
-            beginAtZero: true
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Irradiación (W/m²)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: true
           }
         }
       }
     });
 
     function calcularEstadisticas(data) {
-      const adcValues = Object.values(data).map(item => item.adc);
       const voltValues = Object.values(data).map(item => item.voltaje);
       const pctValues = Object.values(data).map(item => item.porcentaje);
+      const adcValues = Object.values(data).map(item => item.adc);
       const irrValues = voltValues.map(v => v * 1000 / 0.1);
 
       return {
@@ -83,19 +89,17 @@
       const tbody = document.getElementById('datos-body');
       tbody.innerHTML = '';
 
-      const timestamps = Object.keys(data);
-      const adcData = [];
-      const voltData = [];
-      const pctData = [];
+      const labels = [];
       const irrData = [];
 
       for (const key in data) {
         const entrada = data[key];
         const irradiacion = entrada.voltaje * 1000 / 0.1;
+        const fecha = new Date(key);
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${key}</td>
+          <td>${fecha.toLocaleString()}</td>
           <td>${entrada.adc}</td>
           <td>${entrada.voltaje.toFixed(2)}</td>
           <td>${entrada.porcentaje}</td>
@@ -103,17 +107,12 @@
         `;
         tbody.appendChild(tr);
 
-        adcData.push(entrada.adc);
-        voltData.push(entrada.voltaje);
-        pctData.push(entrada.porcentaje);
-        irrData.push(irradiacion);
+        labels.push(fecha);
+        irrData.push({ x: fecha, y: irradiacion });
       }
 
-      chart.data.labels = timestamps;
-      chart.data.datasets[0].data = adcData;
-      chart.data.datasets[1].data = voltData;
-      chart.data.datasets[2].data = pctData;
-      chart.data.datasets[3].data = irrData;
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = irrData;
       chart.update();
 
       const stats = calcularEstadisticas(data);
