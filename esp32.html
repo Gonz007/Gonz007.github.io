@@ -18,34 +18,26 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const potRef = ref(db, 'potenciometro');
+    let currentData = null; // Almacenar datos actuales
 
-    // Función para formatear timestamp de Firebase
+    // Función para formatear timestamp
     function formatearTimestamp(firebaseKey) {
       try {
-        // Extraer componentes de la fecha
-        const fechaStr = firebaseKey.includes('_') 
-          ? firebaseKey.split('_')[0]
-          : firebaseKey.substring(0, 8);
-        const horaStr = firebaseKey.includes('_') 
-          ? firebaseKey.split('_')[1] 
-          : firebaseKey.substring(8);
+        const [fechaStr, horaStr] = firebaseKey.includes('_') 
+          ? firebaseKey.split('_') 
+          : [firebaseKey.slice(0, 8), firebaseKey.slice(8)];
+        
+        const anio = fechaStr.slice(0, 4);
+        const mes = fechaStr.slice(4, 6);
+        const dia = fechaStr.slice(6, 8);
+        const horas = horaStr.slice(0, 2) || '00';
+        const minutos = horaStr.slice(2, 4) || '00';
+        const segundos = horaStr.slice(4, 6) || '00';
 
-        // Parsear fecha
-        const anio = fechaStr.substring(0, 4);
-        const mes = fechaStr.substring(4, 6);
-        const dia = fechaStr.substring(6, 8);
-
-        // Parsear hora
-        const horas = horaStr.substring(0, 2) || '00';
-        const minutos = horaStr.substring(2, 4) || '00';
-        const segundos = horaStr.substring(4, 6) || '00';
-
-        // Crear objeto Date
         const fecha = new Date(
           `${anio}-${mes}-${dia}T${horas}:${minutos}:${segundos}`
         );
-
-        // Formatear para tabla
+        
         return fecha.toLocaleString('es-ES', {
           day: '2-digit',
           month: '2-digit',
@@ -57,7 +49,7 @@
         });
       } catch (error) {
         console.error('Error formateando timestamp:', error);
-        return firebaseKey; // Devolver clave original si falla
+        return firebaseKey;
       }
     }
 
@@ -87,7 +79,6 @@
               minRotation: 45,
               font: { size: 10 },
               callback: function(value) {
-                // Mostrar solo hora:minuto en el eje X
                 return value.split(' ')[1].substring(0, 5);
               }
             },
@@ -101,10 +92,7 @@
         plugins: {
           tooltip: {
             callbacks: {
-              title: (tooltipItems) => {
-                // Mostrar fecha completa en tooltip
-                return tooltipItems[0].label;
-              }
+              title: (tooltipItems) => tooltipItems[0].label
             }
           }
         }
@@ -128,9 +116,41 @@
       };
     }
 
+    // Función para exportar a CSV
+    function exportarACSV() {
+      if (!currentData) {
+        alert('No hay datos para exportar');
+        return;
+      }
+
+      const csvContent = [
+        ['Fecha y Hora', 'ADC', 'Voltaje (V)', 'Porcentaje (%)', 'Irradiación (W/m²)'],
+        ...Object.keys(currentData)
+          .sort((a, b) => a.localeCompare(b))
+          .map(key => [
+            formatearTimestamp(key),
+            currentData[key].adc,
+            currentData[key].voltaje.toFixed(2),
+            currentData[key].porcentaje,
+            (currentData[key].voltaje * 1000 / 0.1).toFixed(2)
+          ])
+      ].map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'datos_piranometro.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     onValue(potRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) {
+      currentData = snapshot.val();
+      if (!currentData) {
         console.log('No hay datos disponibles');
         return;
       }
@@ -138,8 +158,8 @@
       // Actualizar tabla
       const tbody = document.getElementById('datos-body');
       tbody.innerHTML = '';
-      Object.keys(data).forEach(key => {
-        const entrada = data[key];
+      Object.keys(currentData).forEach(key => {
+        const entrada = currentData[key];
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${formatearTimestamp(key)}</td>
@@ -151,24 +171,16 @@
         tbody.appendChild(tr);
       });
 
-      // Preparar datos para gráfico
-      const keys = Object.keys(data).sort((a, b) => a.localeCompare(b));
+      // Actualizar gráfico
+      const keys = Object.keys(currentData).sort((a, b) => a.localeCompare(b));
       const lastKeys = keys.slice(-10);
 
-      const chartLabels = [];
-      const chartData = [];
-      lastKeys.forEach(key => {
-        chartLabels.push(formatearTimestamp(key));
-        chartData.push(data[key].voltaje * 1000 / 0.1);
-      });
-
-      // Actualizar gráfico
-      chart.data.labels = chartLabels;
-      chart.data.datasets[0].data = chartData;
+      chart.data.labels = lastKeys.map(key => formatearTimestamp(key));
+      chart.data.datasets[0].data = lastKeys.map(key => currentData[key].voltaje * 1000 / 0.1);
       chart.update('none');
 
       // Actualizar estadísticas
-      const stats = calcularEstadisticas(data);
+      const stats = calcularEstadisticas(currentData);
       document.getElementById('stats').innerHTML = `
         <h3>Estadísticas:</h3>
         <p>Promedio ADC: ${stats.promedioADC.toFixed(2)}</p>
@@ -182,6 +194,9 @@
         ${(stats.ultimoValor.voltaje * 1000 / 0.1).toFixed(2)} W/m²)</p>
       `;
     });
+
+    // Asignar evento al botón
+    document.getElementById('exportarBtn').addEventListener('click', exportarACSV);
   </script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
@@ -216,6 +231,23 @@
     }
     #stats h3 { margin-top: 0; color: #333; }
     #stats p { margin: 8px 0; color: #666; }
+    #exportarBtn {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    #exportarBtn:hover {
+      background-color: #218838;
+    }
+    #exportarBtn:active {
+      background-color: #1e7e34;
+    }
   </style>
 </head>
 <body>
@@ -241,6 +273,8 @@
       <canvas id="myChart"></canvas>
     </div>
   </div>
+
+  <button id="exportarBtn">Descargar Datos (CSV)</button>
 
   <div id="stats">
     <p>Cargando estadísticas...</p>
