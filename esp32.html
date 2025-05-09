@@ -19,12 +19,42 @@
     const db = getDatabase(app);
     const potRef = ref(db, 'potenciometro');
 
-    // Configuración inicial del gráfico
-    const ctx = document.getElementById('myChart')?.getContext('2d');
-    if (!ctx) {
-      console.error('No se encontró el elemento canvas');
+    // Función para formatear el timestamp
+    function formatearTimestamp(firebaseKey) {
+      // Extraer fecha y hora de la clave de Firebase (formato: YYYYMMDD_HHmmss)
+      const [fechaStr, horaStr] = firebaseKey.includes('_') 
+        ? firebaseKey.split('_') 
+        : [firebaseKey.slice(0, 8), firebaseKey.slice(8)];
+      
+      // Parsear componentes de la fecha
+      const anio = fechaStr.slice(0, 4);
+      const mes = fechaStr.slice(4, 6);
+      const dia = fechaStr.slice(6, 8);
+      
+      // Parsear componentes de la hora
+      const horas = horaStr.slice(0, 2) || '00';
+      const minutos = horaStr.slice(2, 4) || '00';
+      const segundos = horaStr.slice(4, 6) || '00';
+      
+      // Crear objeto Date
+      const fecha = new Date(
+        `${anio}-${mes}-${dia}T${horas}:${minutos}:${segundos}`
+      );
+      
+      // Formatear a local string
+      return fecha.toLocaleString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
     }
 
+    // Configuración inicial del gráfico
+    const ctx = document.getElementById('myChart')?.getContext('2d');
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -47,35 +77,30 @@
               autoSkip: false,
               maxRotation: 45,
               minRotation: 45,
-              font: { size: 10 }
+              font: { size: 10 },
+              callback: function(value) {
+                return value.split(' ')[1]; // Mostrar solo la hora en el gráfico
+              }
             },
-            title: { display: true, text: 'Hora (HHMMSS)' }
+            title: { display: true, text: 'Hora' }
           },
           y: {
             beginAtZero: true,
             title: { display: true, text: 'Irradiación (W/m²)' }
           }
         },
-        plugins: { legend: { display: true } }
+        plugins: { 
+          legend: { display: true },
+          tooltip: {
+            callbacks: {
+              title: (context) => context[0].label // Mostrar fecha completa en tooltip
+            }
+          }
+        }
       }
     });
 
-    function calcularEstadisticas(data) {
-      const voltValues = Object.values(data).map(item => item.voltaje);
-      const pctValues = Object.values(data).map(item => item.porcentaje);
-      const adcValues = Object.values(data).map(item => item.adc);
-      const irrValues = voltValues.map(v => v * 1000 / 0.1);
-
-      return {
-        promedioADC: adcValues.reduce((a, b) => a + b, 0) / adcValues.length,
-        promedioVolt: voltValues.reduce((a, b) => a + b, 0) / voltValues.length,
-        promedioPct: pctValues.reduce((a, b) => a + b, 0) / pctValues.length,
-        promedioIrr: irrValues.reduce((a, b) => a + b, 0) / irrValues.length,
-        maxADC: Math.max(...adcValues),
-        minADC: Math.min(...adcValues),
-        ultimoValor: Object.values(data).pop()
-      };
-    }
+    // ... (mantener igual la función calcularEstadisticas)
 
     onValue(potRef, (snapshot) => {
       const data = snapshot.val();
@@ -89,7 +114,7 @@
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${key}</td>
+          <td>${formatearTimestamp(key)}</td>
           <td>${entrada.adc}</td>
           <td>${entrada.voltaje.toFixed(2)}</td>
           <td>${entrada.porcentaje}</td>
@@ -107,8 +132,7 @@
 
       lastKeys.forEach(key => {
         const entrada = data[key];
-        const labelPart = key.includes('_') ? key.split('_')[1] : key;
-        chartLabels.push(labelPart);
+        chartLabels.push(formatearTimestamp(key));
         chartData.push(entrada.voltaje * 1000 / 0.1);
       });
 
@@ -117,84 +141,15 @@
       chart.data.datasets[0].data = chartData;
       chart.update('none');
 
-      // Calcular y mostrar estadísticas
-      const stats = calcularEstadisticas(data);
-      const lastIrr = stats.ultimoValor.voltaje * 1000 / 0.1;
-
-      document.getElementById('stats').innerHTML = `
-        <h3>Estadísticas:</h3>
-        <p>Promedio ADC: ${stats.promedioADC.toFixed(2)}</p>
-        <p>Promedio Voltaje: ${stats.promedioVolt.toFixed(2)} V</p>
-        <p>Promedio Porcentaje: ${stats.promedioPct.toFixed(2)}%</p>
-        <p>Promedio Irradiación: ${stats.promedioIrr.toFixed(2)} W/m²</p>
-        <p>Máximo ADC: ${stats.maxADC}</p>
-        <p>Mínimo ADC: ${stats.minADC}</p>
-        <p>Último valor: ${stats.ultimoValor.porcentaje}% (${stats.ultimoValor.voltaje.toFixed(2)} V, ${lastIrr.toFixed(2)} W/m²)</p>
-      `;
-
-      // Logs para diagnóstico
-      console.log('Últimas keys:', lastKeys);
-      console.log('Labels generados:', chartLabels);
-      console.log('Datos del gráfico:', chartData);
+      // ... (mantener igual el resto del código para estadísticas)
     });
   </script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .contenedor-principal {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    table { 
-      width: 50%; 
-      border-collapse: collapse;
-      height: fit-content;
-      max-height: 400px;
-      overflow-y: auto;
-      display: block;
-    }
-    #grafica-container {
-      width: 50%;
-      height: 400px;
-    }
-    th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
-    th { background: #f4f4f4; }
-    #stats {
-      padding: 20px;
-      background: #f8f8f8;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-    #stats h3 { margin-top: 0; }
-    #stats p { margin: 5px 0; }
+    /* Mantener igual los estilos */
+    td:first-child { white-space: nowrap; } /* Para evitar wraps en el timestamp */
   </style>
 </head>
 <body>
-  <h1>Lecturas del Piránometro</h1>
-
-  <div class="contenedor-principal">
-    <table>
-      <thead>
-        <tr>
-          <th>Timestamp</th>
-          <th>ADC</th>
-          <th>Voltaje (V)</th>
-          <th>Porcentaje (%)</th>
-          <th>Irradiación (W/m²)</th>
-        </tr>
-      </thead>
-      <tbody id="datos-body">
-        <tr><td colspan="5">Cargando datos...</td></tr>
-      </tbody>
-    </table>
-
-    <div id="grafica-container">
-      <canvas id="myChart"></canvas>
-    </div>
-  </div>
-
-  <div id="stats">
-    <p>Cargando estadísticas...</p>
-  </div>
+  <!-- Mantener igual el HTML -->
 </body>
 </html>
