@@ -19,23 +19,20 @@
     const db = getDatabase(app);
     const potRef = ref(db, 'potenciometro');
 
-    // Configuración inicial del gráfico
-    const ctx = document.getElementById('myChart')?.getContext('2d');
-    if (!ctx) {
-      console.error('No se encontró el elemento canvas');
-    }
-
+    const ctx = document.getElementById('myChart').getContext('2d');
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
-        datasets: [{
-          label: 'Irradiación (W/m²)',
-          data: [],
-          borderColor: 'orange',
-          tension: 0.1,
-          fill: false
-        }]
+        datasets: [
+          {
+            label: 'Irradiación (W/m²)',
+            data: [],
+            borderColor: 'orange',
+            tension: 0.1,
+            fill: false
+          }
+        ]
       },
       options: {
         responsive: true,
@@ -47,16 +44,28 @@
               autoSkip: false,
               maxRotation: 45,
               minRotation: 45,
-              font: { size: 10 }
+              font: {
+                size: 10
+              }
             },
-            title: { display: true, text: 'Hora (HHMMSS)' }
+            title: {
+              display: true,
+              text: 'Hora (HHMMSS)'
+            }
           },
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Irradiación (W/m²)' }
+            title: {
+              display: true,
+              text: 'Irradiación (W/m²)'
+            }
           }
         },
-        plugins: { legend: { display: true } }
+        plugins: {
+          legend: {
+            display: true
+          }
+        }
       }
     });
 
@@ -82,7 +91,6 @@
       const tbody = document.getElementById('datos-body');
       tbody.innerHTML = '';
 
-      // Actualizar tabla
       Object.keys(data).forEach(key => {
         const entrada = data[key];
         const irradiacion = entrada.voltaje * 1000 / 0.1;
@@ -98,8 +106,7 @@
         tbody.appendChild(tr);
       });
 
-      // Preparar datos para el gráfico
-      const keys = Object.keys(data).sort((a, b) => a.localeCompare(b));
+      const keys = Object.keys(data).sort();
       const lastKeys = keys.slice(-10);
 
       const chartLabels = [];
@@ -107,17 +114,14 @@
 
       lastKeys.forEach(key => {
         const entrada = data[key];
-        const labelPart = key.includes('_') ? key.split('_')[1] : key;
-        chartLabels.push(labelPart);
+        chartLabels.push(key.split('_')[1]); // Mostrar sólo la hora
         chartData.push(entrada.voltaje * 1000 / 0.1);
       });
 
-      // Actualizar gráfico
       chart.data.labels = chartLabels;
       chart.data.datasets[0].data = chartData;
-      chart.update('none');
+      chart.update();
 
-      // Calcular y mostrar estadísticas
       const stats = calcularEstadisticas(data);
       const lastIrr = stats.ultimoValor.voltaje * 1000 / 0.1;
 
@@ -131,11 +135,6 @@
         <p>Mínimo ADC: ${stats.minADC}</p>
         <p>Último valor: ${stats.ultimoValor.porcentaje}% (${stats.ultimoValor.voltaje.toFixed(2)} V, ${lastIrr.toFixed(2)} W/m²)</p>
       `;
-
-      // Logs para diagnóstico
-      console.log('Últimas keys:', lastKeys);
-      console.log('Labels generados:', chartLabels);
-      console.log('Datos del gráfico:', chartData);
     });
   </script>
   <style>
@@ -155,7 +154,7 @@
     }
     #grafica-container {
       width: 50%;
-      height: 400px;
+      height: 400px; /* Altura fija */
     }
     th, td { padding: 8px; border: 1px solid #ccc; text-align: center; }
     th { background: #f4f4f4; }
