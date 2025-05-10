@@ -188,7 +188,9 @@ const convertDateToKey = (date, type = 'start') => {
 const exportToExcel = () => {
     const startDateInput = document.getElementById('startDate').value;
     const endDateInput = document.getElementById('endDate').value;
+    const incluirGrafica = document.getElementById('incluirGrafica').checked;
 
+    // Validaciones básicas
     if (!startDateInput || !endDateInput) {
         alert('Por favor selecciona ambas fechas');
         return;
@@ -225,17 +227,108 @@ const exportToExcel = () => {
         return;
     }
 
-    // Crear hoja de cálculo
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
+    let worksheet;
+    let chartImageAdded = false;
+
+    // Si está marcado el checkbox para incluir gráfica
+    if (incluirGrafica) {
+        try {
+            // Clonar el canvas del gráfico para capturar la imagen
+            const canvas = document.getElementById('myChart');
+            const chartCanvas = canvas.cloneNode(true);
+            
+            // Aumentar resolución para mejor calidad
+            chartCanvas.width = 1600;
+            chartCanvas.height = 900;
+            chartCanvas.style.position = 'fixed';
+            chartCanvas.style.left = '-9999px';
+            document.body.appendChild(chartCanvas);
+            
+            // Redibujar el gráfico en alta resolución
+            const ctx = chartCanvas.getContext('2d');
+            ctx.scale(2, 2);
+            chart.draw();
+
+            // Convertir a imagen
+            const dataURL = chartCanvas.toDataURL('image/png');
+            document.body.removeChild(chartCanvas);
+
+            // Crear HTML combinando imagen y tabla
+            const html = `
+                <table border="1">
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; background-color: #f8f9fa">
+                            <img src="${dataURL}" style="max-width: 800px; height: auto">
+                            <div style="margin: 15px 0; font-size: 12px; color: #666">
+                                Gráfico: ${startDateInput} - ${endDateInput}<br>
+                                Total de registros: ${filteredData.length}<br>
+                                Generado el: ${new Date().toLocaleDateString()}
+                            </div>
+                        </td>
+                    </tr>
+                    ${createTableHeader()}
+                    ${createTableBody(filteredData)}
+                </table>
+            `;
+
+            // Convertir HTML a hoja de cálculo
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            worksheet = XLSX.utils.table_to_sheet(doc.querySelector('table'));
+            chartImageAdded = true;
+        } catch (error) {
+            console.error('Error capturando gráfico:', error);
+            alert('Error al incluir el gráfico. Exportando solo datos...');
+        }
+    }
+
+    // Si no se incluye gráfico o falló la captura
+    if (!chartImageAdded) {
+        worksheet = XLSX.utils.json_to_sheet(filteredData);
+        
+        // Agregar cabeceras manualmente
+        XLSX.utils.sheet_add_aoa(worksheet, [
+            ["Fecha", "ADC", "Voltaje (V)", "Irradiancia (W/m²)"]
+        ], { origin: "A1" });
+    }
+
+    // Configurar anchos de columnas
+    const colWidths = [
+        { wch: 25 }, // Fecha
+        { wch: 10 }, // ADC
+        { wch: 15 }, // Voltaje
+        { wch: 20 }  // Irradiancia
+    ];
+    worksheet['!cols'] = colWidths;
+
+    // Añadir hoja al libro
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
 
     // Generar nombre de archivo
     const startStr = startDateInput.replace(/-/g, '');
     const endStr = endDateInput.replace(/-/g, '');
-    XLSX.writeFile(workbook, `Datos_${startStr}_a_${endStr}.xlsx`);
+    XLSX.writeFile(workbook, `Reporte_${startStr}_a_${endStr}.xlsx`);
 };
 
+// Funciones auxiliares
+const createTableHeader = () => `
+    <tr>
+        <th>Fecha</th>
+        <th>ADC</th>
+        <th>Voltaje</th>
+        <th>Irradiancia</th>
+    </tr>
+`;
+
+const createTableBody = (data) => data.map(entry => `
+    <tr>
+        <td>${entry.Fecha}</td>
+        <td>${entry.ADC}</td>
+        <td>${entry.Voltaje}</td>
+        <td>${entry.Irradiancia}</td>
+    </tr>
+`).join('');
 // Event listener para el botón de exportar
 document.getElementById('exportExcel').addEventListener('click', exportToExcel);
 // 10. Prueba con datos locales (descomentar para probar)
