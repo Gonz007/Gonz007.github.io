@@ -1,144 +1,110 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getDatabase, ref, query, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-// Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyDxesgrk_NpKb93tbxSZUK42LOGGyTfyxg",
-  databaseURL: "https://fireesp32-b6a1e-default-rtdb.firebaseio.com",
-  projectId: "fireesp32-b6a1e"
-};
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDxesgrk_NpKb93tbxSZUK42LOGGyTfyxg",
+      databaseURL: "https://fireesp32-b6a1e-default-rtdb.firebaseio.com",
+      projectId: "fireesp32-b6a1e"
+    };
 
-// Inicialización de Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const potRef = ref(db, 'potenciometro');
+    // Inicialización de Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const potRef = ref(db, 'potenciometro');
 
-// Variables globales
-let currentData = {};
-const itemsPerPage = 50;
-let currentPage = 1;
+    // Variables de paginación
+    const itemsPerPage = 50;
+    let currentPage = 1;
+    let currentData = {};
 
-// Elementos del DOM
-const ctx = document.getElementById('myChart').getContext('2d');
-
-// Configuración del gráfico
-const chart = new Chart(ctx, {
-  type: 'line',
-  data: {
-    labels: [],
-    datasets: [{
-      label: 'Irradiación (W/m²)',
-      data: [],
-      borderColor: '#FF6B35',
-      borderWidth: 2,
-      fill: false,
-      pointRadius: 3
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      x: {
-        display: true,
-        title: { display: true, text: 'Hora' },
-        ticks: {
-          callback: value => {
-            const rawValue = chart.data.labels[value];
-            return rawValue?.split(' ')[1]?.substring(0,5) || '';
+    // Gráfico
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Irradiación (W/m²)',
+          data: [],
+          borderColor: '#FF6B35',
+          borderWidth: 2,
+          fill: false,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: { display: true, text: 'Hora' },
+            ticks: {
+              callback: (value, index) => {
+                const label = chart.data.labels[index] || '';
+                return label.split(' ')[1]?.slice(0,5) || label;
+              }
+            }
+          },
+          y: {
+            title: { display: true, text: 'W/m²' },
+            beginAtZero: true,
+            grace: '15%'
           }
         }
-      },
-      y: {
-        display: true,
-        title: { display: true, text: 'W/m²' },
-        beginAtZero: true,
-        grace: '15%'
       }
+    });
+
+    function formatearTimestamp(key) {
+      const [datePart, timePart] = key.split('_');
+      return `${datePart.slice(6,8)}/${datePart.slice(4,6)}/${datePart.slice(0,4)} ` +
+             `${timePart.slice(0,2)}:${timePart.slice(2,4)}:${timePart.slice(4,6)}`;
     }
-  }
-});
 
-// Función para formatear timestamp
-const formatearTimestamp = (firebaseKey) => {
-  try {
-    const [datePart, timePart] = firebaseKey.split('_');
-    return `${datePart.slice(6,8)}/${datePart.slice(4,6)}/${datePart.slice(0,4)} ` +
-           `${timePart?.slice(0,2) || '00'}:${timePart?.slice(2,4) || '00'}:${timePart?.slice(4,6) || '00'}`;
-  } catch (error) {
-    return firebaseKey;
-  }
-};
+    function actualizarTabla(page) {
+      const keys = Object.keys(currentData).sort((a,b) => b.localeCompare(a));
+      const start = (page-1)*itemsPerPage;
+      const slice = keys.slice(start, start + itemsPerPage);
+      const tbody = document.getElementById('datos-body');
+      tbody.innerHTML = '';
+      slice.forEach(key => {
+        const { adc, voltaje } = currentData[key];
+        const irradiacion = (voltaje*1000/0.1);
+        tbody.innerHTML += `
+          <tr>
+            <td>${formatearTimestamp(key)}</td>
+            <td>${adc}</td>
+            <td>${voltaje.toFixed(2)}</td>
+            <td>${irradiacion.toFixed(2)}</td>
+          </tr>`;
+      });
+      document.getElementById('paginaActual').textContent = page;
+      document.getElementById('totalPaginas').textContent = Math.ceil(keys.length/itemsPerPage);
+    }
 
-// Función para actualizar tabla
-const actualizarTabla = (page) => {
-  const start = (page - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  const keys = Object.keys(currentData).sort((a, b) => b.localeCompare(a)); // Orden descendente
-  const pageData = keys.slice(start, end);
+    function updateChart(data) {
+      const keys = Object.keys(data).sort();
+      const lastKeys = keys.slice(-30);
+      chart.data.labels = lastKeys.map(k => formatearTimestamp(k));
+      chart.data.datasets[0].data = lastKeys.map(k => {
+        const val = (data[k].voltaje*1000/0.1);
+        return parseFloat(val.toFixed(2));
+      });
+      chart.update();
+    }
 
-  const tbody = document.getElementById('datos-body');
-  tbody.innerHTML = '';
-  
-  pageData.forEach(key => {
-    const entry = currentData[key];
-    tbody.innerHTML += `
-      <tr>
-        <td>${formatearTimestamp(key)}</td>
-        <td>${entry.adc}</td>
-        <td>${entry.voltaje.toFixed(2)}</td>
-        <td>${(entry.voltaje * 1000 / 0.1).toFixed(2)}</td>
-      </tr>`;
-  });
+    onValue(potRef, snapshot => {
+      currentData = snapshot.val() || {};
+      if (Object.keys(currentData).length) {
+        actualizarTabla(currentPage);
+        updateChart(currentData);
+      }
+    });
 
-  // Actualizar paginación
-  document.getElementById('paginaActual').textContent = page;
-  document.getElementById('totalPaginas').textContent = 
-    Math.ceil(keys.length / itemsPerPage);
-};
-
-// Función para actualizar gráfico
-const updateChart = (data) => {
-  const keys = Object.keys(data).sort();
-  const lastEntries = keys.slice(-30);
-  
-  chart.data.labels = lastEntries.map(key => formatearTimestamp(key));
-  chart.data.datasets[0].data = lastEntries.map(key => 
-    (data[key].voltaje * 1000 / 0.1).toFixed(2)
-  );
-  
-  chart.update();
-};
-
-// Manejo de datos de Firebase
-onValue(potRef, (snapshot) => {
-  currentData = snapshot.val() || {};
-  console.log('Datos recibidos:', currentData);
-  
-  if (Object.keys(currentData).length > 0) {
-    actualizarTabla(currentPage);
-    updateChart(currentData);
-  }
-});
-
-// Eventos de paginación
-document.getElementById('prevPage').addEventListener('click', () => {
-  if (currentPage > 1) actualizarTabla(--currentPage);
-});
-
-document.getElementById('nextPage').addEventListener('click', () => {
-  const totalPages = Math.ceil(Object.keys(currentData).length / itemsPerPage);
-  if (currentPage < totalPages) actualizarTabla(++currentPage);
-});
-
-// Función temporal para prueba
-const testData = {
-  "20231001_120000": { voltaje: 0.5, adc: 512, porcentaje: 50 },
-  "20231001_120100": { voltaje: 0.6, adc: 614, porcentaje: 60 },
-  "20231001_120200": { voltaje: 0.7, adc: 717, porcentaje: 70 }
-};
-
-// Descomenta para probar
-// currentData = testData;
-// actualizarTabla(1);
-// updateChart(testData);
+    document.getElementById('prevPage').onclick = () => {
+      if (currentPage>1) actualizarTabla(--currentPage);
+    };
+    document.getElementById('nextPage').onclick = () => {
+      const total = Math.ceil(Object.keys(currentData).length/itemsPerPage);
+      if (currentPage<total) actualizarTabla(++currentPage);
+    };
