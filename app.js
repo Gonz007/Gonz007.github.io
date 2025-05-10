@@ -1,7 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-import { Chart, registerables } from "https://cdn.jsdelivr.net/npm/chart.js";
-Chart.register(...registerables);
+import { getDatabase, ref, query, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -9,17 +7,16 @@ const firebaseConfig = {
   databaseURL: "https://fireesp32-b6a1e-default-rtdb.firebaseio.com",
   projectId: "fireesp32-b6a1e"
 };
+
+// Inicialización de Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const potRef = ref(db, 'potenciometro');
 
-// Variables globales
-let currentData = {};
-const itemsPerPage = 50;
-let currentPage = 1;
-
-// Inicializa el gráfico
+// Elementos del DOM
 const ctx = document.getElementById('myChart').getContext('2d');
+
+// Configuración básica del gráfico
 const chart = new Chart(ctx, {
   type: 'line',
   data: {
@@ -29,8 +26,7 @@ const chart = new Chart(ctx, {
       data: [],
       borderColor: '#FF6B35',
       borderWidth: 2,
-      fill: false,
-      pointRadius: 3
+      fill: false
     }]
   },
   options: {
@@ -38,88 +34,61 @@ const chart = new Chart(ctx, {
     maintainAspectRatio: false,
     scales: {
       x: {
-        title: { display: true, text: 'Hora' },
-        ticks: {
-          callback: (tickValue, index) => {
-            const label = chart.data.labels[index] || '';
-            return label.split(' ')[1]?.slice(0,5) || '';
-          }
+        display: true,
+        title: {
+          display: true,
+          text: 'Hora'
         }
       },
       y: {
-        title: { display: true, text: 'W/m²' },
-        beginAtZero: true,
-        grace: '15%'
+        display: true,
+        title: {
+          display: true,
+          text: 'W/m²'
+        },
+        beginAtZero: true
       }
     }
   }
 });
 
-// Formatea la clave Firebase a fecha legible
-function formatearTimestamp(key) {
-  const [datePart, timePart = "000000"] = key.split('_');
-  return `${datePart.slice(6,8)}/${datePart.slice(4,6)}/${datePart.slice(0,4)} ` +
-         `${timePart.slice(0,2)}:${timePart.slice(2,4)}:${timePart.slice(4,6)}`;
-}
-
-// Actualiza la tabla HTML
-function actualizarTabla(page) {
-  const keys = Object.keys(currentData).sort((a,b) => b.localeCompare(a));
-  const start = (page - 1) * itemsPerPage;
-  const slice = keys.slice(start, start + itemsPerPage);
-  const tbody = document.getElementById('datos-body');
-  tbody.innerHTML = '';
-  
-  slice.forEach(key => {
-    const { adc, voltaje } = currentData[key];
-    const irradiacion = (voltaje * 1000 / 0.1);
-    tbody.innerHTML += `
-      <tr>
-        <td>${formatearTimestamp(key)}</td>
-        <td>${adc}</td>
-        <td>${voltaje.toFixed(2)}</td>
-        <td>${irradiacion.toFixed(2)}</td>
-      </tr>`;
-  });
-  
-  document.getElementById('paginaActual').textContent = page;
-  document.getElementById('totalPaginas').textContent = 
-    Math.ceil(keys.length / itemsPerPage);
-}
-
-// Actualiza el gráfico con los últimos 30 puntos
-function updateChart(data) {
+// Función para actualizar el gráfico
+const updateChart = (data) => {
   const keys = Object.keys(data).sort();
-  const lastKeys = keys.slice(-30);
-  
-  chart.data.labels = lastKeys.map(k => formatearTimestamp(k));
-  chart.data.datasets[0].data = lastKeys.map(k => {
-    const val = (data[k].voltaje * 1000 / 0.1);
-    return parseFloat(val.toFixed(2));
+  const lastEntries = keys.slice(-30); // Últimos 30 registros
+
+  // Actualizar datos del gráfico
+  chart.data.labels = lastEntries.map(key => {
+    const timePart = key.split('_')[1] || '';
+    return timePart.substring(0, 4) + ':' + timePart.substring(4, 6);
   });
+  
+  chart.data.datasets[0].data = lastEntries.map(key => {
+    return (data[key].voltaje * 1000) / 0.1;
+  });
+
   chart.update();
-}
+};
 
-// Escucha cambios en Firebase
-onValue(potRef, snapshot => {
-  currentData = snapshot.val() || {};
-  if (Object.keys(currentData).length) {
-    actualizarTabla(currentPage);
-    updateChart(currentData);
+// Manejo de datos de Firebase
+onValue(potRef, (snapshot) => {
+  const data = snapshot.val() || {};
+  console.log('Datos recibidos:', data);
+  
+  if (Object.keys(data).length === 0) {
+    console.warn('No hay datos en Firebase');
+    return;
   }
+  
+  updateChart(data);
 });
 
-// Control de paginación
-document.getElementById('prevPage').addEventListener('click', () => {
-  if (currentPage > 1) {
-    currentPage--;
-    actualizarTabla(currentPage);
-  }
-});
-document.getElementById('nextPage').addEventListener('click', () => {
-  const total = Math.ceil(Object.keys(currentData).length / itemsPerPage);
-  if (currentPage < total) {
-    currentPage++;
-    actualizarTabla(currentPage);
-  }
-});
+// Función temporal para prueba de datos
+const testData = {
+  "20231001_120000": { voltaje: 0.5, adc: 512, porcentaje: 50 },
+  "20231001_120100": { voltaje: 0.6, adc: 614, porcentaje: 60 },
+  "20231001_120200": { voltaje: 0.7, adc: 717, porcentaje: 70 }
+};
+
+// Descomenta para probar con datos estáticos
+// updateChart(testData);
