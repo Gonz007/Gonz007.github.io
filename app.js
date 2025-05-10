@@ -254,7 +254,7 @@ const exportToExcel = () => {
             // document.body.appendChild(imgPreview);
 
             // Crear HTML con imagen
-            const html = `
+            const html = '
                 <table>
                     <tr>
                         <td colspan="4">
@@ -269,7 +269,7 @@ const exportToExcel = () => {
                     ${createTableHeader()}
                     ${createTableBody(filteredData)}
                 </table>
-            `;
+            ';
 
             // Convertir HTML a hoja de cálculo
             const parser = new DOMParser();
