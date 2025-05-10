@@ -123,3 +123,16 @@ tr:nth-child(even) {
     padding: 5px 15px;
     margin-left: 10px;
 }
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.form-check-input {
+    margin-right: 5px;
+}
+
+.form-check-label {
+    white-space: nowrap;
+}
