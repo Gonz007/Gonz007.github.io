@@ -1,28 +1,25 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getDatabase, ref, query, limitToLast, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-// Configuración de Firebase
+// 1. Configuración de Firebase (Verifica que sean correctas)
 const firebaseConfig = {
   apiKey: "AIzaSyDxesgrk_NpKb93tbxSZUK42LOGGyTfyxg",
   databaseURL: "https://fireesp32-b6a1e-default-rtdb.firebaseio.com",
   projectId: "fireesp32-b6a1e"
 };
 
-// Inicialización de Firebase
+// 2. Inicialización de Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const potRef = ref(db, 'potenciometro');
 
-// Variables globales para la tabla
+// 3. Variables globales
 let currentData = {};
 const itemsPerPage = 50;
 let currentPage = 1;
 
-// Elementos del DOM
-const ctx = document.getElementById('myChart').getContext('2d');
-
-// Configuración del gráfico (manteniendo tu versión funcional)
-const chart = new Chart(ctx, {
+// 4. Configuración del gráfico (versión simplificada)
+const chart = new Chart(document.getElementById('myChart').getContext('2d'), {
   type: 'line',
   data: {
     labels: [],
@@ -31,97 +28,100 @@ const chart = new Chart(ctx, {
       data: [],
       borderColor: '#FF6B35',
       borderWidth: 2,
-      fill: false,
-      pointRadius: 3
+      fill: false
     }]
   },
   options: {
     responsive: true,
-    maintainAspectRatio: false,
     scales: {
-      x: {
-        display: true,
-        title: { display: true, text: 'Hora' },
-        ticks: {
-          callback: value => {
-            const rawValue = chart.data.labels[value];
-            return rawValue?.split(' ')[1]?.substring(0,5) || '';
-          }
-        }
-      },
-      y: {
-        display: true,
-        title: { display: true, text: 'W/m²' },
+      x: { title: { display: true, text: 'Hora' } },
+      y: { 
         beginAtZero: true,
-        grace: '15%'
+        title: { display: true, text: 'W/m²' },
+        grace: '20%'
       }
     }
   }
 });
 
-// Función para formatear timestamp
+// 5. Función de formato de fecha (mejorada con validación)
 const formatearTimestamp = (firebaseKey) => {
   try {
     const [datePart, timePart] = firebaseKey.split('_');
-    return `${datePart.slice(6,8)}/${datePart.slice(4,6)}/${datePart.slice(0,4)} ` +
-           `${timePart?.slice(0,2) || '00'}:${timePart?.slice(2,4) || '00'}:${timePart?.slice(4,6) || '00'}`;
+    const hora = timePart?.slice(0,2) || '00';
+    const minuto = timePart?.slice(2,4) || '00';
+    return `${hora}:${minuto}`;
   } catch (error) {
-    return firebaseKey;
+    console.error('Error formateando fecha:', error);
+    return 'Fecha inválida';
   }
 };
 
-// Función para actualizar tabla
+// 6. Función para actualizar tabla (con debug)
 const actualizarTabla = (page) => {
-  const start = (page - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  const keys = Object.keys(currentData).sort((a, b) => b.localeCompare(a)); // Orden descendente
-  const pageData = keys.slice(start, end);
+  try {
+    const keys = Object.keys(currentData).sort((a, b) => b.localeCompare(a));
+    const start = (page - 1) * itemsPerPage;
+    const pageData = keys.slice(start, start + itemsPerPage);
+    
+    const tbody = document.getElementById('datos-body');
+    tbody.innerHTML = pageData.map(key => {
+      const entry = currentData[key];
+      return `
+        <tr>
+          <td>${formatearTimestamp(key)}</td>
+          <td>${entry.adc}</td>
+          <td>${entry.voltaje?.toFixed(2) || 'N/D'}</td>
+          <td>${((entry.voltaje || 0) * 1000 / 0.1).toFixed(2)}</td>
+        </tr>`;
+    }).join('');
 
-  const tbody = document.getElementById('datos-body');
-  tbody.innerHTML = '';
-  
-  pageData.forEach(key => {
-    const entry = currentData[key];
-    tbody.innerHTML += `
-      <tr>
-        <td>${formatearTimestamp(key)}</td>
-        <td>${entry.adc}</td>
-        <td>${entry.voltaje.toFixed(2)}</td>
-        <td>${(entry.voltaje * 1000 / 0.1).toFixed(2)}</td>
-      </tr>`;
-  });
-
-  // Actualizar paginación
-  document.getElementById('paginaActual').textContent = page;
-  document.getElementById('totalPaginas').textContent = 
-    Math.ceil(keys.length / itemsPerPage);
+    document.getElementById('paginaActual').textContent = page;
+    document.getElementById('totalPaginas').textContent = Math.ceil(keys.length / itemsPerPage);
+    
+    console.log('Tabla actualizada con', pageData.length, 'registros');
+  } catch (error) {
+    console.error('Error actualizando tabla:', error);
+  }
 };
 
-// Función para actualizar gráfico
+// 7. Función para actualizar gráfico (con validación de datos)
 const updateChart = (data) => {
-  const keys = Object.keys(data).sort();
-  const lastEntries = keys.slice(-30);
-  
-  chart.data.labels = lastEntries.map(key => formatearTimestamp(key));
-  chart.data.datasets[0].data = lastEntries.map(key => 
-    (data[key].voltaje * 1000 / 0.1).toFixed(2)
-  );
-  
-  chart.update();
+  try {
+    const keys = Object.keys(data).sort();
+    const last30 = keys.slice(-30);
+    
+    chart.data.labels = last30.map(key => formatearTimestamp(key));
+    chart.data.datasets[0].data = last30.map(key => 
+      (data[key].voltaje * 1000 / 0.1) || 0
+    );
+    
+    chart.update();
+    console.log('Gráfico actualizado con', last30.length, 'puntos');
+  } catch (error) {
+    console.error('Error actualizando gráfico:', error);
+  }
 };
 
-// Manejo de datos de Firebase
+// 8. Conexión a Firebase con monitorización
 onValue(potRef, (snapshot) => {
-  currentData = snapshot.val() || {};
-  console.log('Datos recibidos:', currentData);
-  
-  if (Object.keys(currentData).length > 0) {
-    actualizarTabla(currentPage);  // Actualizar tabla
-    updateChart(currentData);      // Actualizar gráfico
+  try {
+    currentData = snapshot.val() || {};
+    console.log('Datos recibidos de Firebase:', Object.keys(currentData).length, 'registros');
+    
+    if (!Object.keys(currentData).length) {
+      console.warn('¡Base de datos vacía!');
+      return;
+    }
+    
+    actualizarTabla(currentPage);
+    updateChart(currentData);
+  } catch (error) {
+    console.error('Error en conexión Firebase:', error);
   }
 });
 
-// Eventos de paginación
+// 9. Eventos de paginación (con validación)
 document.getElementById('prevPage').addEventListener('click', () => {
   if (currentPage > 1) actualizarTabla(--currentPage);
 });
@@ -131,14 +131,13 @@ document.getElementById('nextPage').addEventListener('click', () => {
   if (currentPage < totalPages) actualizarTabla(++currentPage);
 });
 
-// Función temporal para prueba
-const testData = {
-  "20231001_120000": { voltaje: 0.5, adc: 512, porcentaje: 50 },
-  "20231001_120100": { voltaje: 0.6, adc: 614, porcentaje: 60 },
-  "20231001_120200": { voltaje: 0.7, adc: 717, porcentaje: 70 }
+// 10. Prueba con datos locales (descomentar para probar)
+/*
+currentData = {
+  "20240320_120000": { voltaje: 0.5, adc: 512, porcentaje: 50 },
+  "20240320_120100": { voltaje: 0.6, adc: 614, porcentaje: 60 },
+  "20240320_120200": { voltaje: 0.7, adc: 717, porcentaje: 70 }
 };
-
-// Para probar con datos estáticos:
-// currentData = testData;
-// actualizarTabla(1);
-// updateChart(testData);
+actualizarTabla(1);
+updateChart(currentData);
+*/
