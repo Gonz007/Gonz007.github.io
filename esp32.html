@@ -9,7 +9,7 @@
 </head>
 <body>
   <h1>Monitor de Irradiación Solar</h1>
-
+  
   <div class="contenedor-principal">
     <table>
       <thead>
@@ -26,18 +26,14 @@
     <div id="grafica-container">
       <canvas id="myChart"></canvas>
     </div>
-  </div>
 
-  <div class="paginacion">
-    <button id="prevPage">◀ Anterior</button>
-    <span>Página <span id="paginaActual">1</span> de <span id="totalPaginas">1</span></span>
-    <button id="nextPage">Siguiente ▶</button>
-  </div>
+    <div class="paginacion">
+      <button id="prevPage">◀ Anterior</button>
+      <span>Página <span id="paginaActual">1</span> de <span id="totalPaginas">1</span></span>
+      <button id="nextPage">Siguiente ▶</button>
+    </div>
 
-  <button id="exportarBtn">📥 Descargar CSV (Partes)</button>
-
-  <div id="stats">
-    <p>...</p>
+    <div id="stats"></div>
   </div>
 
   <script type="module" src="app.js"></script>
