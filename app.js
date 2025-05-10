@@ -15,7 +15,7 @@ const potRef = ref(db, 'potenciometro');
 
 // 3. Variables globales
 let currentData = {};
-const itemsPerPage = 50;
+const itemsPerPage = 15;
 let currentPage = 1;
 
 // 4. Configuración del gráfico (versión simplificada)
@@ -24,21 +24,32 @@ const chart = new Chart(document.getElementById('myChart').getContext('2d'), {
   data: {
     labels: [],
     datasets: [{
-      label: 'Irradiación (W/m²)',
+      label: 'Irradiancia VS Tiempo',
       data: [],
       borderColor: '#FF6B35',
       borderWidth: 2,
-      fill: false
+      fill: false,
+      pointRadius: 3
     }]
   },
   options: {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
-      x: { title: { display: true, text: 'Hora' } },
-      y: { 
+      x: {
+        ticks: {
+          callback: value => {
+            const rawValue = chart.data.labels[value];
+            if (!rawValue) return '';
+            const [fecha, hora] = rawValue.split(' ');
+            return `${fecha.substring(0,5)} ${hora.substring(0,5)}`;
+          }
+        }
+      },
+      y: {
         beginAtZero: true,
         title: { display: true, text: 'W/m²' },
-        grace: '20%'
+        grace: '15%'
       }
     }
   }
@@ -48,11 +59,20 @@ const chart = new Chart(document.getElementById('myChart').getContext('2d'), {
 const formatearTimestamp = (firebaseKey) => {
   try {
     const [datePart, timePart] = firebaseKey.split('_');
-    const hora = timePart?.slice(0,2) || '00';
-    const minuto = timePart?.slice(2,4) || '00';
-    return `${hora}:${minuto}`;
+    
+    // Formatear fecha: DD/MM/YYYY
+    const dia = datePart.slice(6, 8);
+    const mes = datePart.slice(4, 6);
+    const año = datePart.slice(0, 4);
+    
+    // Formatear hora: HH:MM:SS
+    const hora = timePart.slice(0, 2) || '00';
+    const minutos = timePart.slice(2, 4) || '00';
+    const segundos = timePart.slice(4, 6) || '00';
+    
+    return `${dia}/${mes}/${año} ${hora}:${minutos}:${segundos}`;
   } catch (error) {
-    console.error('Error formateando fecha:', error);
+    console.error('Error formateando timestamp:', firebaseKey, error);
     return 'Fecha inválida';
   }
 };
