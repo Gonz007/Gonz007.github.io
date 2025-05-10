@@ -89,6 +89,44 @@ const testData = {
   "20231001_120100": { voltaje: 0.6, adc: 614, porcentaje: 60 },
   "20231001_120200": { voltaje: 0.7, adc: 717, porcentaje: 70 }
 };
+// Función para formatear timestamp
+const formatearTimestamp = (firebaseKey) => {
+  try {
+    const [datePart, timePart] = firebaseKey.split('_');
+    return ${datePart.slice(6,8)}/${datePart.slice(4,6)}/${datePart.slice(0,4)}  +
+           ${timePart?.slice(0,2) || '00'}:${timePart?.slice(2,4) || '00'}:${timePart?.slice(4,6) || '00'};
+  } catch (error) {
+    return firebaseKey;
+  }
+};
+
+// Función para actualizar tabla
+const actualizarTabla = (page) => {
+  const start = (page - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const keys = Object.keys(currentData).sort((a, b) => b.localeCompare(a)); // Orden descendente
+  const pageData = keys.slice(start, end);
+
+  const tbody = document.getElementById('datos-body');
+  tbody.innerHTML = '';
+  
+  pageData.forEach(key => {
+    const entry = currentData[key];
+    tbody.innerHTML += 
+      <tr>
+        <td>${formatearTimestamp(key)}</td>
+        <td>${entry.adc}</td>
+        <td>${entry.voltaje.toFixed(2)}</td>
+        <td>${(entry.voltaje * 1000 / 0.1).toFixed(2)}</td>
+      </tr>;
+  });
+
+  // Actualizar paginación
+  document.getElementById('paginaActual').textContent = page;
+  document.getElementById('totalPaginas').textContent = 
+    Math.ceil(keys.length / itemsPerPage);
+};
+
 
 // Descomenta para probar con datos estáticos
 // updateChart(testData);
