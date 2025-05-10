@@ -53,6 +53,27 @@ const actualizarTabla = (page) => {
   document.getElementById('totalPaginas').textContent = 
     Math.ceil(keys.length / itemsPerPage);
 };
+// Manejo de datos de Firebase
+onValue(potRef, (snapshot) => {
+  currentData = snapshot.val() || {};
+  console.log('Datos recibidos:', currentData);
+  
+  if (Object.keys(currentData).length > 0) {
+    actualizarTabla(currentPage);
+    updateChart(currentData);
+  }
+});
+
+// Eventos de paginación
+document.getElementById('prevPage').addEventListener('click', () => {
+  if (currentPage > 1) actualizarTabla(--currentPage);
+});
+
+document.getElementById('nextPage').addEventListener('click', () => {
+  const totalPages = Math.ceil(Object.keys(currentData).length / itemsPerPage);
+  if (currentPage < totalPages) actualizarTabla(++currentPage);
+});
+
 
 // Configuración básica del gráfico
 const chart = new Chart(ctx, {
