@@ -108,15 +108,14 @@ const actualizarTabla = (page) => {
 // 7. Función para actualizar gráfico (con validación de datos)
 const updateChart = (data) => {
   try {
-    const keys = Object.keys(data).sort((a, b) => a.localeCompare(b)); // Orden ascendente
-    const nodosMostrar = keys.slice(-nodosVisibles); // Tomar los últimos N elementos
+    const keys = Object.keys(data).sort((a, b) => b.localeCompare(a));
+    const nodosMostrar = keys.slice(0, nodosVisibles);
     
     chart.data.labels = nodosMostrar.map(key => formatearTimestamp(key));
     chart.data.datasets[0].data = nodosMostrar.map(key => 
       (data[key].voltaje * 1000 / 0.1) || 0
     );
     
-    chart.options.scales.x.reverse = true; // Invertir eje X
     chart.update();
   } catch (error) {
     console.error('Error actualizando gráfico:', error);
