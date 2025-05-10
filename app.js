@@ -58,13 +58,15 @@ const updateChart = (data) => {
   const lastKeys = keys.slice(-30);
   
   chart.data.labels = lastKeys.map(key => formatearTimestamp(key));
-  chart.data.datasets[0].data = lastKeys.map(key => 
-    (data[key].voltaje * 1000 / 0.1).toFixed(2)
-  );
+  chart.data.datasets[0].data = lastKeys.map(key => {
+    if (data[key] && data[key].voltaje) {
+      return (data[key].voltaje * 1000 / 0.1).toFixed(2);
+    }
+    return 0; // O manejar el caso donde no hay voltaje
+  });
   
   chart.update();
 };
-
 // Función para actualizar tabla
 const actualizarTabla = (page) => {
   const start = (page - 1) * itemsPerPage;
