@@ -12,7 +12,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const potRef = ref(db, 'potenciometro');
-
+let nodosVisibles = 30;
 // 3. Variables globales
 let currentData = {};
 const itemsPerPage = 15;
@@ -108,23 +108,45 @@ const actualizarTabla = (page) => {
 // 7. Función para actualizar gráfico (con validación de datos)
 const updateChart = (data) => {
   try {
-    // Ordenar las claves de más reciente a más antiguo
     const keys = Object.keys(data).sort((a, b) => b.localeCompare(a));
-    // Tomar los primeros 30 registros (los más recientes)
-    const latest30 = keys.slice(0, 30);
+    const nodosMostrar = keys.slice(0, nodosVisibles);
     
-    chart.data.labels = latest30.map(key => formatearTimestamp(key));
-    chart.data.datasets[0].data = latest30.map(key => 
+    chart.data.labels = nodosMostrar.map(key => formatearTimestamp(key));
+    chart.data.datasets[0].data = nodosMostrar.map(key => 
       (data[key].voltaje * 1000 / 0.1) || 0
     );
     
     chart.update();
-    console.log('Gráfico actualizado con', latest30.length, 'puntos');
   } catch (error) {
     console.error('Error actualizando gráfico:', error);
   }
 };
 
+// Agrega estos event listeners al final de tu código
+document.getElementById('rangoNodos').addEventListener('input', function(e) {
+    const valor = parseInt(e.target.value);
+    nodosVisibles = valor;
+    document.getElementById('numeroNodos').value = valor;
+    updateChart(currentData);
+});
+
+document.getElementById('numeroNodos').addEventListener('change', function(e) {
+    let valor = parseInt(e.target.value);
+    if (isNaN(valor)) valor = 30;
+    if (valor < 10) valor = 10;
+    if (valor > 500) valor = 500;
+    
+    nodosVisibles = valor;
+    document.getElementById('rangoNodos').value = valor;
+    updateChart(currentData);
+});
+
+document.getElementById('resetearNodos').addEventListener('click', () => {
+    nodosVisibles = 30;
+    document.getElementById('rangoNodos').value = 30;
+    document.getElementById('numeroNodos').value = 30;
+    updateChart(currentData);
+});
 // 8. Conexión a Firebase con monitorización
 onValue(potRef, (snapshot) => {
   try {
