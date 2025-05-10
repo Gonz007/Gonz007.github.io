@@ -14,6 +14,7 @@ let currentData = null;
 const itemsPerPage = 50;
 let currentPage = 1;
 
+// Formateo de timestamp optimizado
 const formatearTimestamp = (() => {
   const formatter = new Intl.DateTimeFormat('es-ES', {
     day: '2-digit',
@@ -49,6 +50,7 @@ const formatearTimestamp = (() => {
   };
 })();
 
+// Configuración mejorada del gráfico
 const chart = new Chart(document.getElementById('myChart').getContext('2d'), {
   type: 'line',
   data: {
@@ -58,13 +60,23 @@ const chart = new Chart(document.getElementById('myChart').getContext('2d'), {
       data: [],
       borderColor: '#FF6B35',
       tension: 0.1,
-      fill: false
+      fill: false,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      borderWidth: 2
     }]
   },
   options: {
     responsive: true,
     maintainAspectRatio: false,
-    datasets: { line: { spanGaps: true } },
+    datasets: { 
+      line: { 
+        spanGaps: true,
+        segment: {
+          borderColor: ctx => ctx.p0.parsed.y > ctx.p1.parsed.y ? '#FF0000' : '#00FF00'
+        }
+      } 
+    },
     scales: {
       x: {
         type: 'category',
@@ -73,15 +85,78 @@ const chart = new Chart(document.getElementById('myChart').getContext('2d'), {
           maxRotation: 45,
           minRotation: 45,
           font: { size: 10 },
-          callback: value => value.split(' ')[1].substring(0, 5)
+          callback: value => {
+            const date = new Date(value);
+            return isNaN(date) ? value : `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+          }
+        },
+        title: {
+          display: true,
+          text: 'Hora del día',
+          font: { size: 14 }
         }
       },
-      y: { beginAtZero: true }
+      y: {
+        beginAtZero: false,
+        title: {
+          display: true,
+          text: 'Irradiación (W/m²)',
+          font: { size: 14 }
+        },
+        grace: '20%',
+        ticks: {
+          precision: 0,
+          callback: function(value) {
+            return value + ' W/m²';
+          },
+          font: { size: 12 }
+        },
+        grid: {
+          color: '#e0e0e0'
+        }
+      }
     },
-    plugins: { legend: { display: false } }
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#2c3e50',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: '#FF6B35',
+        borderWidth: 1,
+        callbacks: {
+          title: (context) => context[0].label.replace(',', ' - '),
+          label: (context) => `${context.parsed.y} W/m²`
+        }
+      }
+    }
   }
 });
 
+// Función para actualizar el gráfico con márgenes dinámicos
+const updateChart = (data) => {
+  const keys = Object.keys(data).sort((a, b) => a.localeCompare(b));
+  const chartData = keys.slice(-60); // Últimos 60 puntos (5 minutos si hay 1 por segundo)
+  
+  const valoresY = chartData.map(key => data[key].voltaje * 1000 / 0.1);
+  const valoresX = chartData.map(key => formatearTimestamp(key));
+  
+  // Calcular límites del eje Y con márgenes
+  const minY = Math.min(...valoresY);
+  const maxY = Math.max(...valoresY);
+  const rangoY = maxY - minY;
+  const margen = rangoY === 0 ? 100 : rangoY * 0.2; // 20% de margen o 100 si no hay variación
+
+  chart.data.labels = valoresX;
+  chart.data.datasets[0].data = valoresY;
+  
+  chart.options.scales.y.min = Math.max(0, minY - margen);
+  chart.options.scales.y.max = maxY + margen;
+  
+  chart.update();
+};
+
+// Resto del código se mantiene igual hasta las funciones de estadísticas
 const calcularEstadisticas = (data) => {
   const entries = Object.values(data);
   if (entries.length === 0) return null;
@@ -191,17 +266,6 @@ const setupData = (snapshot) => {
   updateStats(limitedData);
 };
 
-const updateChart = (data) => {
-  const keys = Object.keys(data).sort((a, b) => a.localeCompare(b));
-  const chartData = keys.slice(-30);
-
-  chart.data.labels = chartData.map(key => formatearTimestamp(key));
-  chart.data.datasets[0].data = chartData.map(key => 
-    data[key].voltaje * 1000 / 0.1
-  );
-  chart.update('none');
-};
-
 const updateStats = (data) => {
   const stats = calcularEstadisticas(data);
   if (!stats) return;
@@ -221,7 +285,7 @@ const updateStats = (data) => {
   `;
 };
 
-// Event listeners
+// Event Listeners
 document.getElementById('exportarBtn').addEventListener('click', exportarACSV);
 document.getElementById('prevPage').addEventListener('click', () => {
   if (currentPage > 1) actualizarTabla(--currentPage);
@@ -231,4 +295,5 @@ document.getElementById('nextPage').addEventListener('click', () => {
   if (currentPage < totalPages) actualizarTabla(++currentPage);
 });
 
+// Inicialización
 onValue(query(potRef, limitToLast(5000)), setupData);
