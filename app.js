@@ -108,16 +108,18 @@ const actualizarTabla = (page) => {
 // 7. Función para actualizar gráfico (con validación de datos)
 const updateChart = (data) => {
   try {
-    const keys = Object.keys(data).sort();
-    const last30 = keys.slice(-30);
+    // Ordenar las claves de más reciente a más antiguo
+    const keys = Object.keys(data).sort((a, b) => b.localeCompare(a));
+    // Tomar los primeros 30 registros (los más recientes)
+    const latest30 = keys.slice(0, 30);
     
-    chart.data.labels = last30.map(key => formatearTimestamp(key));
-    chart.data.datasets[0].data = last30.map(key => 
+    chart.data.labels = latest30.map(key => formatearTimestamp(key));
+    chart.data.datasets[0].data = latest30.map(key => 
       (data[key].voltaje * 1000 / 0.1) || 0
     );
     
     chart.update();
-    console.log('Gráfico actualizado con', last30.length, 'puntos');
+    console.log('Gráfico actualizado con', latest30.length, 'puntos');
   } catch (error) {
     console.error('Error actualizando gráfico:', error);
   }
