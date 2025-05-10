@@ -234,36 +234,35 @@ const exportToExcel = () => {
     // Si está marcado el checkbox para incluir gráfica
     if (incluirGrafica) {
         try {
-            // Clonar el canvas del gráfico para capturar la imagen
             const canvas = document.getElementById('myChart');
-            const chartCanvas = canvas.cloneNode(true);
-            
-            // Aumentar resolución para mejor calidad
-            chartCanvas.width = 1600;
-            chartCanvas.height = 900;
-            chartCanvas.style.position = 'fixed';
-            chartCanvas.style.left = '-9999px';
-            document.body.appendChild(chartCanvas);
-            
-            // Redibujar el gráfico en alta resolución
-            const ctx = chartCanvas.getContext('2d');
-            ctx.scale(2, 2);
-            chart.draw();
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
 
-            // Convertir a imagen
-            const dataURL = chartCanvas.toDataURL('image/png');
-            document.body.removeChild(chartCanvas);
+            // Configurar tamaño del canvas temporal
+            tempCanvas.width = 1200;
+            tempCanvas.height = 600;
+            
+            // Copiar contenido del gráfico original
+            tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Crear imagen
+            const dataURL = tempCanvas.toDataURL('image/png');
 
-            // Crear HTML combinando imagen y tabla
+            // Verificar imagen (opcional, para debug)
+            // const imgPreview = new Image();
+            // imgPreview.src = dataURL;
+            // document.body.appendChild(imgPreview);
+
+            // Crear HTML con imagen
             const html = `
-                <table border="1">
+                <table>
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 20px; background-color: #f8f9fa">
-                            <img src="${dataURL}" style="max-width: 800px; height: auto">
-                            <div style="margin: 15px 0; font-size: 12px; color: #666">
+                        <td colspan="4">
+                            <img src="${dataURL}" width="800" height="400">
+                            <div style="font-size: 12px; margin-top: 10px">
                                 Gráfico: ${startDateInput} - ${endDateInput}<br>
-                                Total de registros: ${filteredData.length}<br>
-                                Generado el: ${new Date().toLocaleDateString()}
+                                Registros: ${filteredData.length}<br>
+                                Generado: ${new Date().toLocaleString()}
                             </div>
                         </td>
                     </tr>
@@ -282,7 +281,6 @@ const exportToExcel = () => {
             alert('Error al incluir el gráfico. Exportando solo datos...');
         }
     }
-
     // Si no se incluye gráfico o falló la captura
     if (!chartImageAdded) {
         worksheet = XLSX.utils.json_to_sheet(filteredData);
