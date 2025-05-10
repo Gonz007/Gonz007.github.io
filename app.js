@@ -152,7 +152,70 @@ document.getElementById('nextPage').addEventListener('click', () => {
   const totalPages = Math.ceil(Object.keys(currentData).length / itemsPerPage);
   if (currentPage < totalPages) actualizarTabla(++currentPage);
 });
+// Función para convertir fecha a formato de clave Firebase
+const convertDateToKey = (date, type = 'start') => {
+    const pad = n => n.toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const time = type === 'start' ? '000000' : '235959';
+    return `${year}${month}${day}_${time}`;
+};
 
+// Función de exportación a Excel
+const exportToExcel = () => {
+    const startDateInput = document.getElementById('startDate').value;
+    const endDateInput = document.getElementById('endDate').value;
+
+    if (!startDateInput || !endDateInput) {
+        alert('Por favor selecciona ambas fechas');
+        return;
+    }
+
+    const startDate = new Date(startDateInput);
+    const endDate = new Date(endDateInput);
+    
+    if (startDate > endDate) {
+        alert('La fecha de inicio no puede ser mayor a la fecha final');
+        return;
+    }
+
+    // Convertir fechas a formato de clave Firebase
+    const startKey = convertDateToKey(startDate, 'start');
+    const endKey = convertDateToKey(endDate, 'end');
+
+    // Filtrar datos
+    const filteredData = Object.keys(currentData)
+        .filter(key => key >= startKey && key <= endKey)
+        .sort((a, b) => a.localeCompare(b))
+        .map(key => {
+            const entry = currentData[key];
+            return {
+                Fecha: formatearTimestamp(key),
+                ADC: entry.adc,
+                Voltaje: entry.voltaje?.toFixed(2) || 'N/D',
+                Irradiancia: ((entry.voltaje || 0) * 1000 / 0.1).toFixed(2)
+            };
+        });
+
+    if (filteredData.length === 0) {
+        alert('No hay datos en el rango seleccionado');
+        return;
+    }
+
+    // Crear hoja de cálculo
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos');
+
+    // Generar nombre de archivo
+    const startStr = startDateInput.replace(/-/g, '');
+    const endStr = endDateInput.replace(/-/g, '');
+    XLSX.writeFile(workbook, `Datos_${startStr}_a_${endStr}.xlsx`);
+};
+
+// Event listener para el botón de exportar
+document.getElementById('exportExcel').addEventListener('click', exportToExcel);
 // 10. Prueba con datos locales (descomentar para probar)
 /*
 currentData = {
