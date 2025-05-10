@@ -4,7 +4,7 @@ h1 { color: #2c3e50; text-align: center; margin: 20px 0; }
 table { width: 50%; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-collapse: collapse; }
 th, td { padding: 12px; border: 1px solid #dee2e6; text-align: center; white-space: nowrap; }
 th { background: #2c3e50; color: white; position: sticky; top: 0; }
-#grafica-container { width: 50%; height: 400px; background: white; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+#grafica-container { width: 95%; height: 800px; background: white; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 #stats { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 #exportarBtn { display: block; margin: 20px auto; padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; transition: transform 0.2s; }
 #exportarBtn:hover { transform: translateY(-2px); }
@@ -17,22 +17,6 @@ th { background: #2c3e50; color: white; position: sticky; top: 0; }
   gap: 20px;
   margin-bottom: 20px;
 }
-
-#grafica-container {
-  height: 400px;
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-table {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
-
 th, td {
   padding: 12px 15px;
   text-align: center;
@@ -44,33 +28,12 @@ th {
   color: white;
 }
 
-.paginacion {
-  grid-column: 1 / -1;
-  margin: 20px 0;
-}
-
-#stats {
-  grid-column: 1 / -1;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-@media (max-width: 768px) {
-  .contenedor-principal {
-    grid-template-columns: 1fr;
-  }
-  
-  #grafica-container {
-    height: 300px;
-  }
-}
 table {
   width: 100%;
   border-collapse: collapse;
   margin: 20px 0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  height: 800px; 
 }
 
 th, td {
