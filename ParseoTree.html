@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Árbol de Parseo con Autómatas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 20px;
+        }
+
+        #container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        #examples {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #examples button {
+            background-color: #4CAF50;
+            border-radius: 5px;
+        }
+
+        svg {
+            border: 1px solid #ccc;
+            background: white;
+            margin-top: 20px;
+            width: 100%;
+            height: 600px;
+        }
+
+        .node circle {
+            fill: #fff;
+            stroke-width: 3px;
+        }
+
+        .node text {
+            font: 15px sans-serif;
+            fill: #333;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 2px;
+        }
+
+        .error {
+            color: red;
+            margin: 10px;
+        }
+
+        .node.operator circle { stroke: #4CAF50; }
+        .node.number circle { stroke: #2196F3; }
+        .node.variable circle { stroke: #FF9800; }
+        .node.special circle { stroke: #9C27B0; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <input type="text" id="expression" placeholder="Ingresa una expresión (ej: 3+4*(x-2))">
+        <button onclick="parseExpression()">Parsear</button>
+        <div id="examples">
+            <button onclick="loadExample('3+4*(x-2)')">Ejemplo 1</button>
+            <button onclick="loadExample('(a+b)*(c-d)')">Ejemplo 2</button>
+            <button onclick="loadExample('2*x^3 + 4*x - 5')">Ejemplo 3</button>
+            <button onclick="loadExample('((1+2)*3)/(4-x)')">Ejemplo 4</button>
+        </div>
+        <div id="tree"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        class Token {
+            constructor(type, value) {
+                this.type = type;
+                this.value = value;
+            }
+        }
+
+        class Tokenizer {
+            constructor(expression) {
+                this.expression = expression.replace(/\s+/g, '');
+                this.position = 0;
+                this.currentChar = this.expression[0];
+            }
+
+            advance() {
+                this.position++;
+                this.currentChar = this.position < this.expression.length ? 
+                    this.expression[this.position] : null;
+            }
+
+            getNextToken() {
+                while (this.currentChar !== null) {
+                    if (/\d/.test(this.currentChar)) return this.getNumber();
+                    if (this.currentChar === '.') return this.getDecimal();
+                    if (/[+\-*/^()]/.test(this.currentChar)) return this.getOperator();
+                    if (/[a-zA-Z]/.test(this.currentChar)) return this.getVariable();
+                    throw new Error(`Carácter inválido: ${this.currentChar}`);
+                }
+                return new Token('EOF', null);
+            }
+
+            getNumber() {
+                let number = '';
+                while (this.currentChar !== null && (/\d/.test(this.currentChar) || this.currentChar === '.')) {
+                    number += this.currentChar;
+                    this.advance();
+                }
+                return new Token('NUMBER', parseFloat(number));
+            }
+
+            getOperator() {
+                const op = this.currentChar;
+                this.advance();
+                return new Token('OPERATOR', op);
+            }
+
+            getVariable() {
+                let varName = '';
+                while (this.currentChar !== null && /[a-zA-Z]/.test(this.currentChar)) {
+                    varName += this.currentChar;
+                    this.advance();
+                }
+                return new Token('VARIABLE', varName);
+            }
+        }
+
+        class Parser {
+            constructor(tokenizer) {
+                this.tokenizer = tokenizer;
+                this.currentToken = this.tokenizer.getNextToken();
+            }
+
+            parse() {
+                return this.parseExpression();
+            }
+
+            parseExpression() {
+                let node = this.parseTerm();
+                while (['+', '-'].includes(this.currentToken?.value)) {
+                    const op = this.currentToken.value;
+                    this.eat('OPERATOR');
+                    node = new BinaryOperatorNode(op, node, this.parseTerm());
+                }
+                return node;
+            }
+
+            parseTerm() {
+                let node = this.parsePower();
+                while (['*', '/'].includes(this.currentToken?.value)) {
+                    const op = this.currentToken.value;
+                    this.eat('OPERATOR');
+                    node = new BinaryOperatorNode(op, node, this.parsePower());
+                }
+                return node;
+            }
+
+            parsePower() {
+                let node = this.parseFactor();
+                while (this.currentToken?.value === '^') {
+                    const op = this.currentToken.value;
+                    this.eat('OPERATOR');
+                    node = new BinaryOperatorNode(op, node, this.parseFactor());
+                }
+                return node;
+            }
+
+            parseFactor() {
+                if (this.currentToken.type === 'NUMBER') {
+                    const node = new NumberNode(this.currentToken.value);
+                    this.eat('NUMBER');
+                    return node;
+                }
+                if (this.currentToken.type === 'VARIABLE') {
+                    const node = new VariableNode(this.currentToken.value);
+                    this.eat('VARIABLE');
+                    return node;
+                }
+                if (this.currentToken.value === '(') {
+                    this.eat('OPERATOR');
+                    const node = this.parseExpression();
+                    this.eat('OPERATOR', ')');
+                    return new ParenthesisNode(node);
+                }
+                throw new Error('Expresión inválida');
+            }
+
+            eat(expectedType, expectedValue = null) {
+                if (this.currentToken.type !== expectedType ||
+                    (expectedValue !== null && this.currentToken.value !== expectedValue)) {
+                    throw new Error(`Error de sintaxis en posición ${this.tokenizer.position}`);
+                }
+                this.currentToken = this.tokenizer.getNextToken();
+            }
+        }
+
+        class ASTNode {
+            constructor() {
+                this.children = [];
+            }
+        }
+
+        class BinaryOperatorNode extends ASTNode {
+            constructor(operator, left, right) {
+                super();
+                this.operator = operator;
+                this.children = [left, right];
+            }
+        }
+
+        class NumberNode extends ASTNode {
+            constructor(value) {
+                super();
+                this.value = value;
+            }
+        }
+
+        class VariableNode extends ASTNode {
+            constructor(name) {
+                super();
+                this.name = name;
+            }
+        }
+
+        class ParenthesisNode extends ASTNode {
+            constructor(content) {
+                super();
+                this.children = [content];
+            }
+        }
+
+        function parseExpression() {
+    const expression = document.getElementById('expression').value;
+    const errorDiv = document.getElementById('error');
+    errorDiv.textContent = '';
+    try {
+        const tokenizer = new Tokenizer(expression);
+        const parser = new Parser(tokenizer);
+        const ast = parser.parse();
+
+        const treeContainer = document.getElementById('tree');
+        treeContainer.innerHTML = '';
+
+        const treeWidth = getTreeWidth(ast) * 80;
+        const treeDepth = getTreeDepth(ast);
+        const svgWidth = Math.max(800, treeWidth);
+        const svgHeight = 100 + treeDepth * 120;
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', svgWidth);
+        svg.setAttribute('height', svgHeight);
+
+        drawTree(svg, ast, svgWidth / 2, 50, svgWidth / 2.5);
+        treeContainer.appendChild(svg);
+    } catch (error) {
+        errorDiv.textContent = `Error: ${error.message}`;
+    }
+}
+function getTreeDepth(node) {
+    if (!node.children || node.children.length === 0) return 1;
+    return 1 + Math.max(...node.children.map(getTreeDepth));
+}
+
+function getTreeWidth(node) {
+    if (!node.children || node.children.length === 0) return 1;
+    return node.children.map(getTreeWidth).reduce((a, b) => a + b, 0);
+}
+        function drawTree(svg, node, x, y, offsetX, depth = 0) {
+            const nodeType = node.constructor.name;
+            const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+            let nodeClass = 'node ';
+            switch (nodeType) {
+                case 'BinaryOperatorNode': nodeClass += 'operator'; break;
+                case 'NumberNode': nodeClass += 'number'; break;
+                case 'VariableNode': nodeClass += 'variable'; break;
+                case 'ParenthesisNode': nodeClass += 'special'; break;
+                default: nodeClass += 'unknown';
+            }
+            group.setAttribute('class', nodeClass);
+
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+            circle.setAttribute('r', 20);
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y + 5);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('class', 'node-text');
+
+            let label = '?';
+            if (node instanceof BinaryOperatorNode) label = node.operator;
+            else if (node instanceof NumberNode) label = node.value;
+            else if (node instanceof VariableNode) label = node.name;
+            else if (node instanceof ParenthesisNode) label = '()';
+
+            text.textContent = label;
+            group.appendChild(circle);
+            group.appendChild(text);
+            svg.appendChild(group);
+
+            if (node.children && node.children.length > 0) {
+                const numChildren = node.children.length;
+                const spacing = offsetX * Math.pow(0.6, depth);
+                let currentX = x - (spacing * (numChildren - 1)) / 2;
+
+                node.children.forEach((child, index) => {
+                    const newY = y + 100;
+                    const childX = currentX + (spacing * index);
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    line.setAttribute('class', 'link');
+                    line.setAttribute('d', `M ${x} ${y + 20} L ${childX} ${newY - 20}`);
+                    svg.appendChild(line);
+
+                    drawTree(svg, child, childX, newY, offsetX, depth + 1);
+                });
+            }
+        }
+
+        function loadExample(expr) {
+            document.getElementById('expression').value = expr;
+            parseExpression();
+        }
+    </script>
+</body>
+</html>
